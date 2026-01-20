@@ -3,562 +3,737 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Klongtoey Smart Asset - Deep Demo</title>
+    <title>Klongtoey Smart Asset - Master Demo</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
         
-        /* Global Reset */
         body {
             font-family: 'Sarabun', sans-serif;
-            background-color: #f3f4f6; /* Gray-100 */
-            margin: 0;
+            background: #111827; /* Dark BG for presentation focus */
             height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             overflow: hidden;
-            -webkit-tap-highlight-color: transparent;
         }
 
-        /* Mobile Container */
-        #app-root {
-            width: 100%;
-            height: 100%;
-            max-width: 480px; /* Limit width on desktop */
-            margin: 0 auto;
-            background: #ffffff;
+        /* --- DEVICE FRAME (iPhone 14 Pro Style) --- */
+        .device-frame {
+            width: 400px;
+            height: 850px;
+            background: black;
+            border-radius: 50px;
+            border: 12px solid #333;
             position: relative;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
 
-        /* Scrollable Content Area */
-        #main-view {
-            flex: 1;
-            overflow-y: auto;
-            overflow-x: hidden;
-            padding-bottom: 100px; /* Space for Bottom Nav */
-            scroll-behavior: smooth;
-        }
-        #main-view::-webkit-scrollbar { width: 0px; } /* Hide Scrollbar */
-
-        /* Bottom Navigation */
-        .bottom-nav {
+        /* Dynamic Island */
+        .dynamic-island {
             position: absolute;
-            bottom: 0;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.95);
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 35px;
+            background: black;
+            border-radius: 20px;
+            z-index: 999;
+        }
+
+        /* --- OS SIMULATION LAYERS --- */
+        .screen-layer {
+            flex: 1;
+            background: #f3f4f6;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Fake Status Bar */
+        .status-bar {
+            height: 44px;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: #000;
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(5px);
+            z-index: 100;
+        }
+
+        /* Notification Banner */
+        .notification-banner {
+            position: absolute;
+            top: -100px;
+            left: 10px;
+            right: 10px;
+            background: rgba(255,255,255,0.95);
             backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            z-index: 1000;
+            display: flex;
+            gap: 12px;
+            transition: top 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+        }
+        .notification-banner.show { top: 55px; }
+
+        /* --- APP: SMART ASSET UI --- */
+        #app-smart-asset { height: 100%; display: flex; flex-direction: column; }
+        .app-content { flex: 1; overflow-y: auto; padding-bottom: 80px; }
+        .app-content::-webkit-scrollbar { width: 0; }
+        
+        /* Bottom Tab Bar */
+        .tab-bar {
+            height: 70px;
+            background: white;
             border-top: 1px solid #e5e7eb;
             display: flex;
             justify-content: space-around;
             align-items: center;
-            height: 70px; /* Fixed height */
-            padding-bottom: env(safe-area-inset-bottom);
-            z-index: 50;
+            padding-bottom: 20px; /* Safe area */
         }
-
-        /* Floating Action Button (Scan) */
-        .fab-scan {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 24px;
-            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.4);
-            transform: translateY(-20px);
-            border: 4px solid white;
-        }
-        .fab-scan:active { transform: translateY(-18px) scale(0.95); }
-
-        /* Nav Item */
-        .nav-item {
+        .tab-item {
             flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            color: #9ca3af;
             font-size: 10px;
-            transition: color 0.2s;
+            color: #9ca3af;
+            transition: 0.2s;
+            cursor: pointer;
         }
-        .nav-item.active { color: #2563eb; }
-        .nav-item i { font-size: 20px; margin-bottom: 4px; }
+        .tab-item.active { color: #2563eb; transform: translateY(-2px); }
+        .tab-item i { font-size: 20px; margin-bottom: 4px; }
 
-        /* CSS Charts for Executive */
-        .bar-chart-container { display: flex; align-items: flex-end; height: 100px; gap: 8px; }
-        .bar { flex: 1; background: #e5e7eb; border-radius: 4px 4px 0 0; position: relative; transition: height 1s ease-out; }
-        .bar-fill { position: absolute; bottom: 0; left: 0; right: 0; background: #3b82f6; border-radius: 4px 4px 0 0; transition: height 1s ease-out; }
+        /* --- APP: LINE CHAT UI --- */
+        #app-line { 
+            height: 100%; 
+            background: #849ebf; 
+            display: none; 
+            flex-direction: column; 
+        }
+        .chat-header { background: #2c3e50; color: white; padding: 15px; display: flex; align-items: center; gap: 10px; }
+        .chat-area { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
         
-        /* Modal Animation */
-        .modal-enter { animation: slideUp 0.3s forwards; }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .chat-bubble {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            font-size: 14px;
+            position: relative;
+            animation: fadeIn 0.3s;
+        }
+        .chat-bubble.left { background: white; color: black; align-self: flex-start; border-top-left-radius: 2px; }
+        .chat-bubble.right { background: #92d050; color: black; align-self: flex-end; border-top-right-radius: 2px; }
 
+        /* Flex Message Simulation */
+        .flex-msg { background: white; border-radius: 10px; overflow: hidden; width: 240px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .flex-header { background: #2563eb; color: white; padding: 10px; font-weight: bold; }
+        .flex-body { padding: 15px; }
+        .flex-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px; }
+        .flex-btn { display: block; width: 100%; padding: 10px; text-align: center; color: #2563eb; border-top: 1px solid #eee; font-weight: bold; font-size: 14px; cursor: pointer; }
+
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Floating Role Switcher */
+        .role-switcher {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            border-radius: 30px;
+            padding: 5px;
+            display: flex;
+            gap: 5px;
+            z-index: 2000;
+        }
+        .role-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .role-btn:hover { transform: scale(1.1); }
+        .role-btn.active { box-shadow: 0 0 10px white; }
+
+        /* Utility */
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <div id="app-root">
+    <div class="device-frame">
+        <div class="dynamic-island"></div>
         
-        <header class="h-14 bg-white border-b border-gray-100 flex items-center justify-between px-4 sticky top-0 z-40">
-            <div class="flex items-center gap-2">
-                <div id="role-icon" class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm">U</div>
-                <div>
-                    <h1 id="header-title" class="text-sm font-bold text-gray-800">รายการพัสดุ</h1>
-                    <p id="header-subtitle" class="text-[10px] text-gray-500">User Mode</p>
-                </div>
-            </div>
-            <button onclick="toggleRoleSelector()" class="text-gray-400 hover:text-gray-600 px-2">
-                <i class="fas fa-exchange-alt"></i>
-            </button>
-        </header>
-
-        <div id="main-view" class="p-4">
-            </div>
-
-        <div id="role-modal" class="hidden absolute inset-0 bg-black/80 z-[60] flex items-center justify-center p-6">
-            <div class="bg-white w-full rounded-2xl p-5 animate__animated animate__zoomIn">
-                <h2 class="text-lg font-bold mb-4 text-center">เลือกบทบาท (Switch Role)</h2>
-                <div class="grid grid-cols-2 gap-3">
-                    <button onclick="switchRole('user')" class="p-4 bg-blue-50 rounded-xl text-center hover:bg-blue-100 border border-blue-100">
-                        <i class="fas fa-user text-2xl text-blue-600 mb-2"></i>
-                        <div class="text-sm font-bold text-blue-800">ผู้ใช้งาน</div>
-                    </button>
-                    <button onclick="switchRole('staff')" class="p-4 bg-green-50 rounded-xl text-center hover:bg-green-100 border border-green-100">
-                        <i class="fas fa-user-check text-2xl text-green-600 mb-2"></i>
-                        <div class="text-sm font-bold text-green-800">เจ้าหน้าที่</div>
-                    </button>
-                    <button onclick="switchRole('executive')" class="col-span-2 p-4 bg-purple-50 rounded-xl text-center hover:bg-purple-100 border border-purple-100">
-                        <i class="fas fa-chart-pie text-2xl text-purple-600 mb-2"></i>
-                        <div class="text-sm font-bold text-purple-800">ผู้บริหาร</div>
-                    </button>
-                </div>
-                <button onclick="toggleRoleSelector()" class="mt-4 w-full py-2 text-gray-400 text-sm">ปิดหน้าต่าง</button>
+        <div class="status-bar">
+            <span id="clock">12:00</span>
+            <div class="flex gap-1.5">
+                <i class="fas fa-signal"></i>
+                <i class="fas fa-wifi"></i>
+                <i class="fas fa-battery-full"></i>
             </div>
         </div>
 
-        <div id="qty-modal" class="hidden absolute inset-0 z-50 bg-black/50 flex flex-col justify-end">
-            <div class="bg-white rounded-t-2xl p-6 modal-enter shadow-2xl">
-                <div class="flex items-start gap-4 mb-6">
-                    <div id="qty-img" class="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center text-3xl">📦</div>
+        <div id="notification" class="notification-banner" onclick="openLineApp()">
+            <div class="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center text-white text-xl">
+                <i class="fab fa-line"></i>
+            </div>
+            <div class="flex-1">
+                <div class="flex justify-between items-center mb-1">
+                    <span class="font-bold text-xs">LINE • Now</span>
+                </div>
+                <div class="font-bold text-sm">Klongtoey Smart Asset</div>
+                <div class="text-xs text-gray-500" id="notif-text">มีรายการแจ้งเตือนใหม่...</div>
+            </div>
+        </div>
+
+        <div class="screen-layer">
+            
+            <div id="app-smart-asset">
+                <header class="bg-white px-4 py-3 shadow-sm flex justify-between items-center z-10">
                     <div>
-                        <h3 id="qty-name" class="font-bold text-lg text-gray-800">ชื่อสินค้า</h3>
-                        <p id="qty-stock" class="text-xs text-green-600 mb-1">คงเหลือ: 100</p>
-                        <p class="text-xs text-gray-400">เลือกจำนวนที่ต้องการยืม</p>
+                        <h1 class="font-bold text-lg text-gray-800" id="header-title">บริการพัสดุ</h1>
+                        <span class="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-500" id="role-badge">User</span>
                     </div>
-                </div>
-                
-                <div class="flex items-center justify-between bg-gray-50 rounded-xl p-2 mb-6 border border-gray-200">
-                    <button onclick="adjustQty(-1)" class="w-12 h-12 bg-white rounded-lg shadow-sm text-gray-600 text-xl font-bold active:scale-95 transition">-</button>
-                    <input id="qty-input" type="number" value="1" class="bg-transparent text-center text-2xl font-bold w-20 outline-none" readonly>
-                    <button onclick="adjustQty(1)" class="w-12 h-12 bg-white rounded-lg shadow-sm text-blue-600 text-xl font-bold active:scale-95 transition">+</button>
-                </div>
+                    <div class="w-8 h-8 rounded-full bg-gray-200 overflow-hidden border border-gray-300">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="Profile">
+                    </div>
+                </header>
 
-                <button onclick="confirmAddToCart()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-blue-500/30 active:scale-95 transition">
-                    ยืนยันใส่ตะกร้า
-                </button>
-                <button onclick="closeQtyModal()" class="w-full mt-2 py-3 text-gray-400 text-sm">ยกเลิก</button>
+                <div class="app-content" id="main-view">
+                    </div>
+
+                <div class="tab-bar" id="tab-bar">
+                    </div>
             </div>
+
+            <div id="app-line">
+                <div class="chat-header">
+                    <i class="fas fa-chevron-left cursor-pointer" onclick="closeLineApp()"></i>
+                    <h3 class="font-bold">Klongtoey Smart Asset (Bot)</h3>
+                </div>
+                <div class="chat-area" id="chat-history">
+                    </div>
+                <div class="bg-white p-3 flex gap-2 items-center">
+                    <i class="fas fa-plus text-gray-400"></i>
+                    <i class="fas fa-camera text-gray-400"></i>
+                    <i class="fas fa-image text-gray-400"></i>
+                    <input type="text" placeholder="Aa" class="flex-1 bg-gray-100 rounded-full px-3 py-1.5 text-sm outline-none" disabled>
+                    <i class="fas fa-microphone text-gray-400"></i>
+                </div>
+            </div>
+
         </div>
+    </div>
 
-        <nav id="bottom-nav" class="bottom-nav">
-            </nav>
-
+    <div class="role-switcher">
+        <button class="role-btn bg-blue-500 active" onclick="setRole('user')" title="User"><i class="fas fa-user"></i></button>
+        <button class="role-btn bg-green-500" onclick="setRole('staff')" title="Staff"><i class="fas fa-id-badge"></i></button>
+        <button class="role-btn bg-orange-500" onclick="setRole('admin')" title="Admin"><i class="fas fa-tools"></i></button>
+        <button class="role-btn bg-purple-500" onclick="setRole('exec')" title="Executive"><i class="fas fa-chart-pie"></i></button>
     </div>
 
     <script>
-        // --- DATA LAYER ---
+        // --- REALTIME CLOCK ---
+        setInterval(() => {
+            document.getElementById('clock').innerText = moment().format('HH:mm');
+        }, 1000);
+
+        // --- DATABASE (MOCK) ---
         const DB = {
-            assets: [
-                { id: 1, name: "เก้าอี้พลาสติกขาว", stock: 200, used: 45, img: "🪑", cat: "furniture", popular: 98 },
-                { id: 2, name: "โต๊ะพับอเนกประสงค์", stock: 50, used: 12, img: "🟫", cat: "furniture", popular: 85 },
-                { id: 3, name: "เต็นท์ผ้าใบ 3x3m", stock: 10, used: 10, img: "⛺", cat: "outdoor", popular: 92 },
-                { id: 4, name: "ชุดเครื่องเสียงพกพา", stock: 5, used: 2, img: "🔊", cat: "tech", popular: 60 },
-                { id: 5, name: "โปรเจคเตอร์ Epson", stock: 3, used: 1, img: "📽️", cat: "tech", popular: 45 },
-                { id: 6, name: "พัดลมไอน้ำ", stock: 8, used: 0, img: "💨", cat: "outdoor", popular: 70 },
-                { id: 7, name: "แผงกั้นจราจร", stock: 30, used: 5, img: "🚧", cat: "tool", popular: 30 }
+            users: [
+                { id: 'U1', name: 'นายสมชาย', role: 'user', dept: 'ชุมชนหมู่ 1', status: 'active' },
+                { id: 'U2', name: 'น.ส.ใจดี', role: 'staff', dept: 'ฝ่ายพัสดุ', status: 'active' },
+                { id: 'U3', name: 'นาย A (รออนุมัติ)', role: 'user', dept: 'ประชาชน', status: 'pending' }
             ],
-            broken_logs: [
-                { id: 'L-001', item: 'ไมโครโฟนไร้สาย', issue: 'ตกน้ำ เสียงไม่ออก', reporter: 'ชุมชนหมู่ 3', date: '20 ม.ค. 69' },
-                { id: 'L-002', item: 'เก้าอี้พลาสติก', issue: 'ขาหัก 2 ตัว', reporter: 'ฝ่ายทะเบียน', date: '18 ม.ค. 69' },
-                { id: 'L-003', item: 'เต็นท์ผ้าใบ', issue: 'โครงเหล็กงอจากลมพายุ', reporter: 'งานกาชาด', date: '15 ม.ค. 69' }
+            assets: [
+                { id: 1, name: "เก้าอี้พลาสติก (ขาว)", stock: 500, available: 450, img: "🪑", cat: "furniture", pop: 95 },
+                { id: 2, name: "โต๊ะพับหน้าขาว 1.5ม.", stock: 100, available: 80, img: "🟫", cat: "furniture", pop: 80 },
+                { id: 3, name: "เต็นท์ผ้าใบ 3x3m", stock: 20, available: 2, img: "⛺", cat: "outdoor", pop: 99 },
+                { id: 4, name: "โปรเจคเตอร์ Epson", stock: 5, available: 4, img: "📽️", cat: "tech", pop: 60 },
+                { id: 5, name: "ไมโครโฟนไร้สาย", stock: 10, available: 10, img: "🎤", cat: "audio", pop: 70 },
+                { id: 6, name: "ชุดเครื่องเสียงสนาม", stock: 4, available: 0, img: "🔊", cat: "audio", pop: 85 },
+                { id: 7, name: "แผงกั้นจราจร", stock: 50, available: 40, img: "🚧", cat: "tool", pop: 30 },
+                { id: 8, name: "พัดลมไอน้ำ", stock: 10, available: 8, img: "💨", cat: "outdoor", pop: 50 }
             ],
             requests: [
-                { id: 'R-101', user: 'นายสมชาย', items: 'เก้าอี้ x 50', status: 'pending', date: '10:30' },
-                { id: 'R-100', user: 'น.ส.มานี', items: 'โปรเจคเตอร์ x 1', status: 'approved', date: '09:15' }
+                { id: 'R-099', user: 'นายสมชาย', items: [{name: 'เต็นท์ผ้าใบ 3x3m', qty: 2}], status: 'approved', date: 'Yesterday' },
+            ],
+            logs: [
+                { time: '10:00', actor: 'System', action: 'Auto-backup completed' },
+                { time: '09:45', actor: 'น.ส.ใจดี', action: 'Approved R-099' }
             ]
         };
 
         let STATE = {
-            role: 'user', // user, staff, executive
+            role: 'user',
             cart: [],
-            currentQtyItem: null,
-            tempQty: 1
+            currentApp: 'asset' // asset, line
         };
 
-        // --- INIT ---
-        function init() {
-            renderView();
-        }
+        // --- CORE FUNCTIONS ---
 
-        // --- NAVIGATION & ROLE SWITCHING ---
-        function toggleRoleSelector() {
-            const modal = document.getElementById('role-modal');
-            modal.classList.toggle('hidden');
-        }
-
-        function switchRole(role) {
+        function setRole(role) {
             STATE.role = role;
-            toggleRoleSelector();
-            renderView();
+            
+            // Update UI Badges
+            document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector(`.role-btn[onclick="setRole('${role}')"]`).classList.add('active');
+            
+            const badge = document.getElementById('role-badge');
+            const title = document.getElementById('header-title');
+            
+            if(role === 'user') { badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-blue-100 text-blue-600"; badge.innerText = "User"; title.innerText = "ยืมพัสดุ"; }
+            else if(role === 'staff') { badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-green-100 text-green-600"; badge.innerText = "Staff L2"; title.innerText = "เจ้าหน้าที่"; }
+            else if(role === 'admin') { badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-orange-100 text-orange-600"; badge.innerText = "Admin"; title.innerText = "ผู้ดูแลระบบ"; }
+            else { badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-purple-100 text-purple-600"; badge.innerText = "Executive"; title.innerText = "ผู้บริหาร"; }
+
+            // Reset View
+            closeLineApp();
+            renderTabs();
+            // Default views per role
+            if(role === 'user') renderUserHome();
+            else if(role === 'staff') renderStaffDashboard();
+            else if(role === 'admin') renderAdminUsers();
+            else renderExecDashboard();
         }
 
-        function renderView() {
-            const nav = document.getElementById('bottom-nav');
-            const main = document.getElementById('main-view');
-            const headerTitle = document.getElementById('header-title');
-            const headerSub = document.getElementById('header-subtitle');
-            const roleIcon = document.getElementById('role-icon');
+        function triggerNotification(text, type = 'info') {
+            const banner = document.getElementById('notification');
+            document.getElementById('notif-text').innerText = text;
+            banner.classList.add('show');
+            
+            // Auto hide
+            setTimeout(() => { banner.classList.remove('show'); }, 4000);
 
-            // Update Header
-            if(STATE.role === 'user') {
-                headerTitle.innerText = 'บริการยืมพัสดุ';
-                headerSub.innerText = 'ประชาชนทั่วไป';
-                roleIcon.className = "w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm";
-                roleIcon.innerText = "U";
-                
-                // User Nav
-                nav.innerHTML = `
-                    <div onclick="renderUserHome()" class="nav-item active"><i class="fas fa-home"></i><span>หน้าแรก</span></div>
-                    <div onclick="renderUserCart()" class="nav-item relative">
-                        <i class="fas fa-shopping-basket"></i><span>ตะกร้า</span>
-                        ${STATE.cart.length > 0 ? `<div class="absolute top-1 right-8 w-4 h-4 bg-red-500 rounded-full text-white text-[9px] flex items-center justify-center border border-white">${STATE.cart.length}</div>` : ''}
-                    </div>
-                    <div onclick="renderUserStatus()" class="nav-item"><i class="fas fa-clipboard-list"></i><span>สถานะ</span></div>
-                `;
-                renderUserHome();
+            // Add to Line Chat History automatically
+            addChatMessage('bot', text, type);
+        }
 
-            } else if (STATE.role === 'staff') {
-                headerTitle.innerText = 'ระบบเจ้าหน้าที่';
-                headerSub.innerText = 'ฝ่ายพัสดุ (L2)';
-                roleIcon.className = "w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center font-bold text-sm";
-                roleIcon.innerText = "S";
+        function openLineApp() {
+            document.getElementById('app-smart-asset').style.display = 'none';
+            document.getElementById('app-line').style.display = 'flex';
+            document.getElementById('notification').classList.remove('show');
+            STATE.currentApp = 'line';
+        }
 
-                // Staff Nav (Scanner in Middle)
-                nav.innerHTML = `
-                    <div onclick="renderStaffDashboard()" class="nav-item active"><i class="fas fa-th-large"></i><span>แดชบอร์ด</span></div>
-                    <div onclick="renderStaffTasks()" class="nav-item relative">
-                        <i class="fas fa-bell"></i><span>รออนุมัติ</span>
-                        <div class="absolute top-1 right-6 w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-                    </div>
-                    <div class="nav-item" style="flex: 0 0 70px;">
-                        <div onclick="renderScanner()" class="fab-scan"><i class="fas fa-qrcode"></i></div>
-                    </div>
-                    <div onclick="renderStaffHistory()" class="nav-item"><i class="fas fa-history"></i><span>ประวัติ</span></div>
-                    <div class="nav-item"><i class="fas fa-cog"></i><span>ตั้งค่า</span></div>
-                `;
-                renderStaffDashboard();
+        function closeLineApp() {
+            document.getElementById('app-smart-asset').style.display = 'flex';
+            document.getElementById('app-line').style.display = 'none';
+            STATE.currentApp = 'asset';
+        }
 
-            } else if (STATE.role === 'executive') {
-                headerTitle.innerText = 'Executive View';
-                headerSub.innerText = 'รายงานภาพรวม';
-                roleIcon.className = "w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-sm";
-                roleIcon.innerText = "E";
-
-                // Executive Nav
-                nav.innerHTML = `
-                    <div onclick="renderExecutiveDashboard()" class="nav-item active text-purple-600"><i class="fas fa-chart-line"></i><span>Overview</span></div>
-                    <div onclick="renderExecutiveBroken()" class="nav-item"><i class="fas fa-tools"></i><span>ซ่อมบำรุง</span></div>
-                    <div class="nav-item"><i class="fas fa-star"></i><span>ความพึงพอใจ</span></div>
-                `;
-                renderExecutiveDashboard();
+        function addChatMessage(sender, text, type = 'text') {
+            const chat = document.getElementById('chat-history');
+            let html = '';
+            
+            if(sender === 'bot') {
+                if(type === 'flex-request') {
+                    html = `
+                        <div class="chat-bubble left p-0 bg-transparent animate__animated animate__fadeInLeft">
+                            <div class="flex-msg">
+                                <div class="flex-header">🛒 รายการคำขอยืม</div>
+                                <div class="flex-body">
+                                    <div class="font-bold mb-2 text-gray-800">ยืนยันรายการยืมพัสดุ</div>
+                                    <div class="flex-row text-gray-500"><span>User:</span><span>${DB.users[0].name}</span></div>
+                                    <div class="flex-row text-gray-500"><span>Items:</span><span>${text}</span></div>
+                                    <div class="flex-row text-orange-500 font-bold"><span>Status:</span><span>รออนุมัติ</span></div>
+                                </div>
+                                <div class="flex-btn" onclick="closeLineApp()">กลับไปที่แอป</div>
+                            </div>
+                        </div>`;
+                } else if (type === 'flex-approve') {
+                    html = `
+                        <div class="chat-bubble left p-0 bg-transparent animate__animated animate__fadeInLeft">
+                            <div class="flex-msg">
+                                <div class="flex-header bg-green-500">✅ อนุมัติแล้ว</div>
+                                <div class="flex-body">
+                                    <div class="font-bold mb-2 text-gray-800">พร้อมรับของ</div>
+                                    <div class="text-xs text-gray-500 mb-2">เจ้าหน้าที่อนุมัติรายการยืมของคุณแล้ว กรุณาสแกน QR เพื่อรับของ</div>
+                                </div>
+                                <div class="flex-btn text-green-600" onclick="closeLineApp(); setRole('user'); renderUserStatus();">เปิด QR Code</div>
+                            </div>
+                        </div>`;
+                } else {
+                    html = `<div class="chat-bubble left">${text}</div>`;
+                }
+            } else {
+                html = `<div class="chat-bubble right">${text}</div>`;
             }
+            
+            chat.innerHTML += html;
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        function renderTabs() {
+            const nav = document.getElementById('tab-bar');
+            let html = '';
+            
+            if (STATE.role === 'user') {
+                html = `
+                    <div onclick="renderUserHome()" class="tab-item"><i class="fas fa-home"></i>หน้าแรก</div>
+                    <div onclick="renderUserCart()" class="tab-item relative">
+                        <i class="fas fa-shopping-basket"></i>ตะกร้า
+                        ${STATE.cart.length > 0 ? `<div class="absolute top-0 right-8 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-[9px]">${STATE.cart.length}</div>` : ''}
+                    </div>
+                    <div onclick="renderUserStatus()" class="tab-item"><i class="fas fa-tasks"></i>สถานะ</div>
+                    <div class="tab-item"><i class="fas fa-user"></i>โปรไฟล์</div>
+                `;
+            } else if (STATE.role === 'staff') {
+                html = `
+                    <div onclick="renderStaffDashboard()" class="tab-item"><i class="fas fa-chart-pie"></i>ภาพรวม</div>
+                    <div onclick="renderStaffTasks()" class="tab-item relative">
+                        <i class="fas fa-clipboard-check"></i>อนุมัติ
+                        ${DB.requests.filter(r => r.status === 'pending').length > 0 ? '<div class="absolute top-0 right-8 w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>' : ''}
+                    </div>
+                    <div onclick="renderScanner()" class="tab-item text-blue-600"><i class="fas fa-qrcode text-3xl"></i></div>
+                    <div class="tab-item"><i class="fas fa-history"></i>ประวัติ</div>
+                `;
+            } else if (STATE.role === 'admin') {
+                html = `
+                    <div onclick="renderAdminUsers()" class="tab-item"><i class="fas fa-users-cog"></i>ผู้ใช้</div>
+                    <div onclick="renderAdminStock()" class="tab-item"><i class="fas fa-boxes"></i>คลัง</div>
+                    <div class="tab-item"><i class="fas fa-file-alt"></i>Logs</div>
+                `;
+            } else if (STATE.role === 'exec') {
+                html = `
+                    <div onclick="renderExecDashboard()" class="tab-item"><i class="fas fa-chart-line"></i>Overview</div>
+                    <div class="tab-item"><i class="fas fa-tools"></i>Report</div>
+                `;
+            }
+            nav.innerHTML = html;
         }
 
         // ==========================================
-        // ROLE: USER
+        // VIEW: USER
         // ==========================================
-
         function renderUserHome() {
             const main = document.getElementById('main-view');
             let html = `
-                <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-4 text-white shadow-lg mb-6">
-                    <h2 class="text-lg font-bold mb-1">สวัสดี, คุณสมชาย 👋</h2>
-                    <p class="text-xs text-blue-100 mb-3">ชุมชนคลองเตยล็อค 4-5-6</p>
-                    <div class="flex gap-2">
-                         <span class="bg-white/20 text-[10px] px-2 py-1 rounded">Credit Score: A+</span>
-                         <span class="bg-white/20 text-[10px] px-2 py-1 rounded">สิทธิ์คงเหลือ: 100%</span>
+                <div class="px-4 py-2">
+                    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-4 text-white shadow-lg mb-4">
+                        <h2 class="font-bold text-lg">สวัสดีครับ, คุณสมชาย</h2>
+                        <p class="text-xs opacity-80 mb-2">ชุมชนหมู่ 1 • Credit Score: A</p>
+                        <div class="flex gap-2 text-[10px]">
+                            <span class="bg-white/20 px-2 py-1 rounded">สิทธิ์คงเหลือ: 100%</span>
+                            <span class="bg-white/20 px-2 py-1 rounded">คืนตรงเวลา: 100%</span>
+                        </div>
                     </div>
-                </div>
 
-                <div class="flex gap-3 overflow-x-auto pb-2 mb-4 no-scrollbar">
-                    <button class="bg-blue-600 text-white px-4 py-1.5 rounded-full text-xs whitespace-nowrap shadow-sm">ทั้งหมด</button>
-                    <button class="bg-white border border-gray-200 text-gray-600 px-4 py-1.5 rounded-full text-xs whitespace-nowrap">เฟอร์นิเจอร์</button>
-                    <button class="bg-white border border-gray-200 text-gray-600 px-4 py-1.5 rounded-full text-xs whitespace-nowrap">เครื่องเสียง</button>
-                    <button class="bg-white border border-gray-200 text-gray-600 px-4 py-1.5 rounded-full text-xs whitespace-nowrap">อุปกรณ์จราจร</button>
-                </div>
+                    <div class="flex gap-2 overflow-x-auto pb-2 mb-2 no-scrollbar">
+                        <button class="px-4 py-1.5 bg-gray-800 text-white rounded-full text-xs whitespace-nowrap">ทั้งหมด</button>
+                        <button class="px-4 py-1.5 bg-gray-100 text-gray-600 border rounded-full text-xs whitespace-nowrap">เฟอร์นิเจอร์</button>
+                        <button class="px-4 py-1.5 bg-gray-100 text-gray-600 border rounded-full text-xs whitespace-nowrap">เครื่องเสียง</button>
+                    </div>
 
-                <h3 class="font-bold text-gray-700 mb-3 text-sm">รายการพัสดุที่ยืมได้</h3>
-                <div class="grid grid-cols-2 gap-3 pb-20">
+                    <h3 class="font-bold text-sm text-gray-700 mb-2">รายการพัสดุ</h3>
+                    <div class="grid grid-cols-2 gap-3">
             `;
 
             DB.assets.forEach(item => {
-                const stockLeft = item.stock - item.used;
-                const isOut = stockLeft <= 0;
+                const isOut = item.available <= 0;
                 html += `
-                    <div onclick="${isOut ? '' : `openQtyModal(${item.id})`}" class="bg-white rounded-xl p-3 shadow-sm border border-gray-100 flex flex-col h-full active:scale-95 transition duration-200 ${isOut ? 'opacity-60 grayscale' : ''}">
-                        <div class="h-24 bg-gray-50 rounded-lg flex items-center justify-center text-4xl mb-3 relative">
-                            ${item.img}
-                            ${isOut ? '<span class="absolute inset-0 flex items-center justify-center bg-gray-100/80 font-bold text-red-500 text-sm border-2 border-red-500 rounded-lg m-2 transform -rotate-12">ของหมด</span>' : ''}
-                        </div>
-                        <h4 class="font-bold text-gray-800 text-sm line-clamp-1">${item.name}</h4>
-                        <div class="flex justify-between items-end mt-auto pt-2">
-                            <span class="text-[10px] ${stockLeft < 5 ? 'text-red-500 font-bold' : 'text-green-600'}">เหลือ ${stockLeft} ชิ้น</span>
-                            <div class="w-6 h-6 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-xs font-bold shadow-sm">+</div>
+                    <div onclick="${isOut ? '' : `addToCart(${item.id})`}" class="bg-white p-3 rounded-xl border border-gray-100 shadow-sm active:scale-95 transition relative overflow-hidden ${isOut ? 'opacity-60 grayscale' : ''}">
+                        ${isOut ? '<div class="absolute top-2 right-2 bg-red-500 text-white text-[9px] px-2 py-0.5 rounded font-bold">หมด</div>' : ''}
+                        <div class="h-20 bg-gray-50 rounded-lg flex items-center justify-center text-4xl mb-2">${item.img}</div>
+                        <h4 class="font-bold text-xs text-gray-800 line-clamp-1">${item.name}</h4>
+                        <div class="flex justify-between items-end mt-1">
+                            <span class="text-[10px] ${item.available < 5 ? 'text-red-500 font-bold' : 'text-green-600'}">ว่าง ${item.available}</span>
+                            <div class="w-6 h-6 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xs">+</div>
                         </div>
                     </div>
                 `;
             });
-            html += `</div>`;
+
+            html += `</div></div>`;
             main.innerHTML = html;
         }
 
-        // --- QTY MODAL LOGIC ---
-        function openQtyModal(id) {
+        function addToCart(id) {
             const item = DB.assets.find(a => a.id === id);
-            STATE.currentQtyItem = item;
-            STATE.tempQty = 1;
-
-            document.getElementById('qty-name').innerText = item.name;
-            document.getElementById('qty-img').innerText = item.img;
-            document.getElementById('qty-stock').innerText = `คงเหลือ: ${item.stock - item.used} ชิ้น`;
-            document.getElementById('qty-input').value = 1;
             
-            document.getElementById('qty-modal').classList.remove('hidden');
-        }
-
-        function adjustQty(delta) {
-            const max = STATE.currentQtyItem.stock - STATE.currentQtyItem.used;
-            let newQty = STATE.tempQty + delta;
-            if(newQty < 1) newQty = 1;
-            if(newQty > max) newQty = max;
-            STATE.tempQty = newQty;
-            document.getElementById('qty-input').value = newQty;
-        }
-
-        function closeQtyModal() {
-            document.getElementById('qty-modal').classList.add('hidden');
-        }
-
-        function confirmAddToCart() {
-            const item = STATE.currentQtyItem;
-            const existing = STATE.cart.find(c => c.id === item.id);
-            if(existing) {
-                existing.qty += STATE.tempQty;
-            } else {
-                STATE.cart.push({ ...item, qty: STATE.tempQty });
-            }
-            
-            closeQtyModal();
-            renderView(); // Refresh badge
-            
+            // SweetAlert for Qty
             Swal.fire({
-                icon: 'success',
-                title: 'ใส่ตะกร้าแล้ว',
-                text: `${item.name} x ${STATE.tempQty}`,
-                timer: 1000,
-                showConfirmButton: false,
-                toast: true,
-                position: 'top-end'
+                title: item.name,
+                text: `คงเหลือ: ${item.available} ชิ้น`,
+                input: 'number',
+                inputValue: 1,
+                inputAttributes: { min: 1, max: item.available, step: 1 },
+                showCancelButton: true,
+                confirmButtonText: 'ใส่ตะกร้า',
+                confirmButtonColor: '#2563eb'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const qty = parseInt(result.value);
+                    const existing = STATE.cart.find(c => c.id === id);
+                    if(existing) existing.qty += qty;
+                    else STATE.cart.push({...item, qty});
+                    
+                    renderTabs(); // Update badge
+                    const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 1500 });
+                    Toast.fire({ icon: 'success', title: 'เพิ่มลงตะกร้าแล้ว' });
+                }
             });
         }
 
-        // --- CART VIEW ---
         function renderUserCart() {
             const main = document.getElementById('main-view');
             if(STATE.cart.length === 0) {
                 main.innerHTML = `<div class="h-full flex flex-col items-center justify-center text-gray-400">
-                    <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center text-3xl mb-4">🛒</div>
-                    <p>ตะกร้ายังว่างอยู่ครับ</p>
-                    <button onclick="renderUserHome()" class="mt-4 text-blue-600 font-bold text-sm">กลับไปหน้าแรก</button>
+                    <i class="fas fa-shopping-basket text-4xl mb-2"></i><p>ตะกร้าว่างเปล่า</p>
+                    <button onclick="renderUserHome()" class="mt-4 text-blue-600 font-bold text-sm">กลับไปเลือกของ</button>
                 </div>`;
                 return;
             }
 
-            let html = `
-                <h2 class="font-bold text-lg text-gray-800 mb-4 px-2">ตะกร้าสินค้า (${STATE.cart.length})</h2>
-                <div class="space-y-3 mb-6">
-            `;
-
+            let html = `<div class="px-4 py-2"><h2 class="font-bold text-lg mb-3">ตะกร้าสินค้า</h2><div class="space-y-3 mb-6">`;
+            
             STATE.cart.forEach((item, idx) => {
                 html += `
-                    <div class="bg-white p-4 rounded-xl shadow-sm flex items-center gap-4 border border-gray-100 animate__animated animate__fadeInRight">
+                    <div class="bg-white p-3 rounded-xl border border-gray-100 shadow-sm flex items-center gap-3">
                         <div class="w-12 h-12 bg-gray-50 rounded-lg flex items-center justify-center text-2xl">${item.img}</div>
                         <div class="flex-1">
-                            <h4 class="font-bold text-gray-800 text-sm">${item.name}</h4>
-                            <p class="text-xs text-blue-600 font-medium">จำนวน: ${item.qty} ชิ้น</p>
+                            <h4 class="font-bold text-sm">${item.name}</h4>
+                            <div class="flex items-center gap-2 mt-1">
+                                <button onclick="STATE.cart[${idx}].qty > 1 ? STATE.cart[${idx}].qty-- : null; renderUserCart();" class="w-5 h-5 bg-gray-100 rounded text-xs">-</button>
+                                <span class="text-xs font-bold w-4 text-center">${item.qty}</span>
+                                <button onclick="STATE.cart[${idx}].qty++; renderUserCart();" class="w-5 h-5 bg-gray-100 rounded text-xs">+</button>
+                            </div>
                         </div>
-                        <button onclick="STATE.cart.splice(${idx},1); renderUserCart(); renderView();" class="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition"><i class="fas fa-trash-alt text-xs"></i></button>
+                        <button onclick="STATE.cart.splice(${idx},1); renderUserCart(); renderTabs();" class="text-red-500"><i class="fas fa-trash"></i></button>
                     </div>
                 `;
             });
 
-            html += `
+            html += `</div>
+                <div class="bg-gray-50 p-4 rounded-xl mb-6">
+                    <h3 class="font-bold text-xs text-gray-500 mb-2 uppercase">รายละเอียดการยืม</h3>
+                    <input type="datetime-local" class="w-full bg-white border border-gray-200 rounded p-2 text-xs mb-2">
+                    <textarea class="w-full bg-white border border-gray-200 rounded p-2 text-xs h-16" placeholder="ระบุเหตุผล..."></textarea>
                 </div>
-                
-                <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 mb-20">
-                    <h3 class="font-bold text-sm text-gray-700 mb-3 border-b pb-2">รายละเอียดการยืม</h3>
-                    
-                    <div class="grid grid-cols-2 gap-3 mb-3">
-                        <div>
-                            <label class="text-[10px] text-gray-500 font-bold uppercase">วันที่รับของ</label>
-                            <input type="datetime-local" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-2 py-2 text-xs mt-1">
-                        </div>
-                        <div>
-                            <label class="text-[10px] text-gray-500 font-bold uppercase">วันที่คืนของ</label>
-                            <input type="datetime-local" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-2 py-2 text-xs mt-1">
-                        </div>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label class="text-[10px] text-gray-500 font-bold uppercase">วัตถุประสงค์ / หมายเหตุ</label>
-                        <textarea class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs mt-1 h-20" placeholder="เช่น ใช้จัดงานวันเด็ก ณ ลานกีฬา..."></textarea>
-                    </div>
-
-                    <button onclick="submitRequest()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-xl font-bold text-sm shadow-lg shadow-blue-500/30">
-                        ยืนยันคำขอ
-                    </button>
-                </div>
-            `;
+                <button onclick="submitOrder()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold shadow-lg shadow-blue-500/30">ยืนยันคำขอ</button>
+            </div>`;
             main.innerHTML = html;
         }
 
-        function submitRequest() {
+        function submitOrder() {
             Swal.fire({
-                title: 'กำลังส่งข้อมูล...',
-                html: 'กรุณารอสักครู่',
-                timer: 1500,
-                timerProgressBar: true,
-                didOpen: () => Swal.showLoading()
-            }).then(() => {
-                STATE.cart = [];
-                DB.requests.unshift({ id: 'R-NEW', user: 'คุณสมชาย', items: 'รายการใหม่...', status: 'pending', date: 'Now' });
-                renderUserStatus();
-                renderView(); // refresh badge
-                Swal.fire('สำเร็จ', 'ส่งคำขอเรียบร้อยแล้ว รอเจ้าหน้าที่อนุมัติ', 'success');
+                title: 'ยืนยัน?',
+                text: "ส่งคำขอให้เจ้าหน้าที่ตรวจสอบ",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#2563eb',
+                confirmButtonText: 'ยืนยัน'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const orderId = 'R-' + Math.floor(Math.random() * 1000);
+                    const itemsText = STATE.cart.map(i => `${i.name} x${i.qty}`).join(', ');
+                    
+                    DB.requests.unshift({
+                        id: orderId,
+                        user: 'นายสมชาย',
+                        items: STATE.cart.map(i => ({name: i.name, qty: i.qty})),
+                        status: 'pending',
+                        date: 'Just Now'
+                    });
+                    
+                    STATE.cart = [];
+                    renderTabs();
+                    renderUserStatus();
+                    
+                    // Trigger Fake Line Notify
+                    triggerNotification(`สร้างคำขอ ${orderId} เรียบร้อยแล้ว`, 'flex-request');
+                }
             });
         }
 
-        // --- STATUS VIEW ---
         function renderUserStatus() {
             const main = document.getElementById('main-view');
-            let html = `<h2 class="font-bold text-lg text-gray-800 mb-4 px-2">สถานะคำขอ</h2><div class="space-y-3 pb-20">`;
+            let html = `<div class="px-4 py-2"><h2 class="font-bold text-lg mb-3">สถานะคำขอ</h2><div class="space-y-3">`;
             
             DB.requests.forEach(req => {
-                let statusBadge = req.status === 'approved' 
-                    ? '<span class="bg-green-100 text-green-700 text-[10px] px-2 py-1 rounded-full font-bold">อนุมัติแล้ว</span>' 
-                    : '<span class="bg-orange-100 text-orange-700 text-[10px] px-2 py-1 rounded-full font-bold">รอตรวจสอบ</span>';
+                let badge = req.status === 'approved' 
+                    ? '<span class="bg-green-100 text-green-600 text-[10px] px-2 py-0.5 rounded font-bold">อนุมัติแล้ว</span>'
+                    : '<span class="bg-orange-100 text-orange-600 text-[10px] px-2 py-0.5 rounded font-bold">รอตรวจสอบ</span>';
                 
                 html += `
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                        <div class="flex justify-between items-start mb-2">
-                            <div>
-                                <div class="text-xs text-gray-400 font-mono">ID: ${req.id}</div>
-                                <div class="font-bold text-sm text-gray-800">${req.date}</div>
-                            </div>
-                            ${statusBadge}
+                    <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                        <div class="flex justify-between mb-2">
+                            <span class="font-mono text-xs text-gray-500">${req.id} • ${req.date}</span>
+                            ${badge}
                         </div>
-                        <div class="bg-gray-50 p-2 rounded text-xs text-gray-600 mb-3">${req.items}</div>
-                        ${req.status === 'approved' ? `<button onclick="Swal.fire('Scan QR','แสดง QR Code ให้เจ้าหน้าที่สแกน','info')" class="w-full bg-green-500 text-white py-2 rounded-lg text-xs font-bold"><i class="fas fa-qrcode mr-1"></i> สแกนรับของ</button>` : ''}
+                        <div class="bg-gray-50 p-2 rounded text-xs text-gray-700 mb-3">
+                            ${req.items.map(i => `<div>- ${i.name} x${i.qty}</div>`).join('')}
+                        </div>
+                        ${req.status === 'approved' ? 
+                            `<button onclick="renderUserQR('${req.id}')" class="w-full bg-green-500 text-white py-2 rounded-lg text-xs font-bold"><i class="fas fa-qrcode mr-1"></i> สแกนรับของ</button>` : 
+                            '<button class="w-full bg-gray-100 text-gray-400 py-2 rounded-lg text-xs font-bold cursor-not-allowed">รอการอนุมัติ</button>'}
                     </div>
                 `;
             });
+            html += `</div></div>`;
             main.innerHTML = html;
         }
 
-        // ==========================================
-        // ROLE: STAFF
-        // ==========================================
+        function renderUserQR(id) {
+            Swal.fire({
+                title: 'QR รับของ',
+                text: 'แสดงให้เจ้าหน้าที่สแกน',
+                html: `<div class="bg-white p-4 inline-block rounded-xl border-4 border-green-500 mb-2"><i class="fas fa-qrcode text-6xl"></i></div><br><span class="font-mono font-bold">${id}</span>`,
+                confirmButtonText: 'ปิด'
+            });
+        }
 
+        // ==========================================
+        // VIEW: STAFF
+        // ==========================================
         function renderStaffDashboard() {
             const main = document.getElementById('main-view');
             main.innerHTML = `
-                <div class="grid grid-cols-2 gap-3 mb-6">
-                    <div class="bg-blue-600 p-4 rounded-2xl text-white shadow-lg shadow-blue-500/30 relative overflow-hidden">
-                        <i class="fas fa-box-open absolute -right-4 -bottom-4 text-6xl opacity-20"></i>
-                        <div class="text-3xl font-bold">12</div>
-                        <div class="text-xs opacity-80">รอส่งมอบวันนี้</div>
-                    </div>
-                    <div class="bg-orange-500 p-4 rounded-2xl text-white shadow-lg shadow-orange-500/30 relative overflow-hidden">
-                        <i class="fas fa-exclamation-circle absolute -right-4 -bottom-4 text-6xl opacity-20"></i>
-                        <div class="text-3xl font-bold">3</div>
-                        <div class="text-xs opacity-80">เกินกำหนดคืน</div>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 mb-6">
-                    <h3 class="font-bold text-sm text-gray-700 mb-3">เมนูด่วน (Quick Action)</h3>
-                    <div class="grid grid-cols-3 gap-3">
-                        <button onclick="renderScanner()" class="flex flex-col items-center justify-center bg-gray-50 p-3 rounded-xl hover:bg-blue-50 transition">
-                            <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mb-2"><i class="fas fa-qrcode"></i></div>
-                            <span class="text-[10px] font-bold text-gray-600">สแกน</span>
-                        </button>
-                        <button class="flex flex-col items-center justify-center bg-gray-50 p-3 rounded-xl hover:bg-green-50 transition">
-                            <div class="w-10 h-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center mb-2"><i class="fas fa-plus"></i></div>
-                            <span class="text-[10px] font-bold text-gray-600">รับของเข้า</span>
-                        </button>
-                        <button class="flex flex-col items-center justify-center bg-gray-50 p-3 rounded-xl hover:bg-red-50 transition">
-                            <div class="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center mb-2"><i class="fas fa-tools"></i></div>
-                            <span class="text-[10px] font-bold text-gray-600">แจ้งซ่อม</span>
-                        </button>
-                    </div>
-                </div>
-
-                <h3 class="font-bold text-sm text-gray-700 mb-3 px-1">รายการรออนุมัติล่าสุด</h3>
-                ${DB.requests.filter(r => r.status === 'pending').map(r => `
-                    <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-blue-500 mb-3">
-                        <div class="flex justify-between">
-                            <span class="font-bold text-sm">${r.user}</span>
-                            <span class="text-[10px] text-gray-400">${r.date}</span>
+                <div class="px-4 py-2">
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <div class="bg-blue-600 rounded-xl p-4 text-white shadow-lg relative overflow-hidden">
+                            <i class="fas fa-box absolute -right-3 -bottom-3 text-6xl opacity-20"></i>
+                            <div class="text-2xl font-bold">${DB.requests.filter(r => r.status === 'approved').length}</div>
+                            <div class="text-xs opacity-80">รอส่งมอบ</div>
                         </div>
-                        <p class="text-xs text-gray-600 mt-1">${r.items}</p>
-                        <div class="flex gap-2 mt-2">
-                            <button class="flex-1 bg-green-500 text-white text-xs py-1.5 rounded">อนุมัติ</button>
-                            <button class="flex-1 bg-gray-100 text-gray-600 text-xs py-1.5 rounded">ดูรายละเอียด</button>
+                        <div class="bg-orange-500 rounded-xl p-4 text-white shadow-lg relative overflow-hidden">
+                            <i class="fas fa-clock absolute -right-3 -bottom-3 text-6xl opacity-20"></i>
+                            <div class="text-2xl font-bold">${DB.requests.filter(r => r.status === 'pending').length}</div>
+                            <div class="text-xs opacity-80">รออนุมัติ</div>
                         </div>
                     </div>
-                `).join('')}
+
+                    <h3 class="font-bold text-sm text-gray-700 mb-2">Quick Actions</h3>
+                    <div class="grid grid-cols-3 gap-2 mb-6">
+                        <button onclick="renderScanner()" class="flex flex-col items-center bg-gray-50 p-3 rounded-xl hover:bg-blue-50 transition border border-gray-100">
+                            <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mb-1"><i class="fas fa-qrcode"></i></div>
+                            <span class="text-[10px] font-bold">สแกน</span>
+                        </button>
+                        <button class="flex flex-col items-center bg-gray-50 p-3 rounded-xl hover:bg-green-50 transition border border-gray-100">
+                            <div class="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center mb-1"><i class="fas fa-plus"></i></div>
+                            <span class="text-[10px] font-bold">รับคืน</span>
+                        </button>
+                        <button class="flex flex-col items-center bg-gray-50 p-3 rounded-xl hover:bg-red-50 transition border border-gray-100">
+                            <div class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center mb-1"><i class="fas fa-wrench"></i></div>
+                            <span class="text-[10px] font-bold">แจ้งซ่อม</span>
+                        </button>
+                    </div>
+
+                    <h3 class="font-bold text-sm text-gray-700 mb-2">Log ล่าสุด</h3>
+                    <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                        ${DB.logs.slice(0,3).map(l => `
+                            <div class="flex items-center p-3 border-b border-gray-50 last:border-0">
+                                <span class="text-xs font-mono text-gray-400 mr-3">${l.time}</span>
+                                <div>
+                                    <div class="text-xs font-bold text-gray-700">${l.actor}</div>
+                                    <div class="text-[10px] text-gray-500">${l.action}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
             `;
+        }
+
+        function renderStaffTasks() {
+            const main = document.getElementById('main-view');
+            const pendings = DB.requests.filter(r => r.status === 'pending');
+            
+            let html = `<div class="px-4 py-2"><h2 class="font-bold text-lg mb-3">รายการรออนุมัติ (${pendings.length})</h2><div class="space-y-3">`;
+            
+            if(pendings.length === 0) {
+                html += `<div class="text-center text-gray-400 mt-10"><i class="fas fa-check-circle text-4xl mb-2"></i><p>ไม่มีงานค้าง</p></div>`;
+            }
+
+            pendings.forEach(req => {
+                html += `
+                    <div class="bg-white p-4 rounded-xl border-l-4 border-blue-500 shadow-sm">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <h4 class="font-bold text-sm">${req.user}</h4>
+                                <span class="text-[10px] text-gray-500">User Credit: A</span>
+                            </div>
+                            <span class="text-[10px] text-gray-400">${req.date}</span>
+                        </div>
+                        <div class="bg-gray-50 p-2 rounded text-xs text-gray-600 mb-3">
+                            ${req.items.map(i => `<div>• ${i.name} x${i.qty}</div>`).join('')}
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="approveRequest('${req.id}')" class="flex-1 bg-green-500 text-white py-2 rounded-lg text-xs font-bold shadow-sm">อนุมัติ</button>
+                            <button class="flex-1 bg-gray-100 text-gray-600 py-2 rounded-lg text-xs font-bold">ปฏิเสธ</button>
+                        </div>
+                    </div>
+                `;
+            });
+            html += `</div></div>`;
+            main.innerHTML = html;
+        }
+
+        function approveRequest(id) {
+            Swal.fire({ title: 'ยืนยันอนุมัติ?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#22c55e', confirmButtonText: 'Yes' }).then((res) => {
+                if(res.isConfirmed) {
+                    const req = DB.requests.find(r => r.id === id);
+                    req.status = 'approved';
+                    
+                    DB.logs.unshift({ time: moment().format('HH:mm'), actor: 'Staff', action: `Approved ${id}` });
+                    
+                    renderStaffTasks();
+                    renderTabs(); // Update badge
+                    
+                    // Trigger Notification to User (Simulation)
+                    setTimeout(() => {
+                        triggerNotification(`คำขอ ${id} ได้รับการอนุมัติแล้ว`, 'flex-approve');
+                    }, 1000);
+                }
+            });
         }
 
         function renderScanner() {
             const main = document.getElementById('main-view');
             main.innerHTML = `
-                <div class="h-full flex flex-col bg-black rounded-xl overflow-hidden relative">
-                    <div class="flex-1 bg-cover bg-center opacity-60" style="background-image: url('https://images.unsplash.com/photo-1566576912322-7e8abb0eb9e5?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80');"></div>
+                <div class="h-full bg-black relative flex flex-col items-center justify-center overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1566576912322-7e8abb0eb9e5?w=800&q=80" class="absolute inset-0 w-full h-full object-cover opacity-50">
                     
-                    <div class="absolute inset-0 flex items-center justify-center">
-                        <div class="w-64 h-64 border-2 border-green-400 rounded-2xl relative">
-                            <div class="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-green-500 -mt-1 -ml-1"></div>
-                            <div class="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-green-500 -mt-1 -mr-1"></div>
-                            <div class="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-green-500 -mb-1 -ml-1"></div>
-                            <div class="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-green-500 -mb-1 -mr-1"></div>
-                            <div class="w-full h-0.5 bg-green-500 shadow-[0_0_15px_rgba(34,197,94,1)] absolute top-1/2 animate-[pulse_2s_infinite]"></div>
-                        </div>
+                    <div class="w-64 h-64 border-2 border-green-400 rounded-3xl relative z-10">
+                        <div class="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-green-500 -mt-1 -ml-1"></div>
+                        <div class="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-green-500 -mt-1 -mr-1"></div>
+                        <div class="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-green-500 -mb-1 -ml-1"></div>
+                        <div class="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-green-500 -mb-1 -mr-1"></div>
+                        <div class="w-full h-0.5 bg-green-500 shadow-[0_0_15px_rgba(34,197,94,1)] absolute top-1/2 animate-[pulse_1.5s_infinite]"></div>
                     </div>
                     
-                    <div class="absolute bottom-20 w-full text-center">
-                        <p class="text-white font-bold animate-pulse mb-2">กำลังค้นหา QR Code...</p>
-                        <button onclick="Swal.fire('Scan Success', 'พบข้อมูล: นายสมชาย ยืมเก้าอี้ 50 ตัว', 'success')" class="bg-white/20 backdrop-blur-md border border-white/50 text-white px-6 py-2 rounded-full text-sm">
-                            จำลองการสแกน
+                    <div class="z-10 mt-8 text-center">
+                        <p class="text-white font-bold animate-pulse mb-4">Searching for QR Code...</p>
+                        <button onclick="Swal.fire('Scan Found', 'Found R-099<br>User: นายสมชาย', 'success')" class="bg-white/20 backdrop-blur border border-white/50 text-white px-6 py-2 rounded-full text-xs font-bold">
+                            Simulate Scan
                         </button>
                     </div>
                 </div>
@@ -566,120 +741,169 @@
         }
 
         // ==========================================
-        // ROLE: EXECUTIVE
+        // VIEW: ADMIN
         // ==========================================
-        
-        function renderExecutiveDashboard() {
+        function renderAdminUsers() {
             const main = document.getElementById('main-view');
-            main.innerHTML = `
-                <div class="bg-gradient-to-br from-indigo-900 to-purple-800 rounded-2xl p-5 text-white shadow-xl mb-6">
-                    <h2 class="text-sm font-bold text-indigo-200 mb-1 uppercase tracking-wider">Social Impact (รายเดือน)</h2>
-                    <div class="flex items-baseline gap-2 mb-4">
-                        <span class="text-4xl font-bold">1,248</span>
-                        <span class="text-sm text-indigo-200">ครั้งการใช้งาน</span>
-                    </div>
-                    <div class="flex gap-4 text-xs border-t border-indigo-700 pt-4">
-                        <div>
-                            <span class="block text-indigo-300">ประชาชนได้รับประโยชน์</span>
-                            <span class="font-bold text-lg">~5,000 คน</span>
-                        </div>
-                        <div>
-                            <span class="block text-indigo-300">ลดค่าใช้จ่ายชุมชน</span>
-                            <span class="font-bold text-lg">฿ 2.5M</span>
-                        </div>
-                    </div>
+            const pendingUsers = DB.users.filter(u => u.status === 'pending');
+            
+            let html = `<div class="px-4 py-2">
+                <div class="bg-gray-50 rounded-xl p-3 mb-4 flex justify-between items-center border border-gray-200">
+                    <span class="text-xs font-bold text-gray-600">Total Users</span>
+                    <span class="text-lg font-bold text-blue-600">${DB.users.length}</span>
                 </div>
+                
+                <h3 class="font-bold text-sm text-gray-700 mb-2">New Registrations (${pendingUsers.length})</h3>
+                <div class="space-y-2 mb-6">`;
 
-                <h3 class="font-bold text-gray-700 mb-3 px-1">Top 5 พัสดุขวัญใจชุมชน</h3>
-                <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 mb-6 space-y-4">
-                    ${DB.assets.sort((a,b) => b.popular - a.popular).slice(0,5).map(item => `
+            if(pendingUsers.length === 0) html += `<div class="text-center text-xs text-gray-400 py-4">No pending users</div>`;
+
+            pendingUsers.forEach(u => {
+                html += `
+                    <div class="bg-white p-3 rounded-xl border border-gray-100 shadow-sm flex justify-between items-center">
                         <div>
-                            <div class="flex justify-between text-xs mb-1">
-                                <span class="font-bold text-gray-700">${item.img} ${item.name}</span>
-                                <span class="text-blue-600 font-bold">${item.popular}% Utilization</span>
-                            </div>
-                            <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
-                                <div class="h-full bg-blue-500 rounded-full" style="width: ${item.popular}%"></div>
-                            </div>
+                            <div class="font-bold text-sm">${u.name}</div>
+                            <div class="text-[10px] text-gray-500">${u.dept} • ${u.role}</div>
+                        </div>
+                        <div class="flex gap-1">
+                            <button onclick="approveUser('${u.id}')" class="w-7 h-7 bg-green-100 text-green-600 rounded flex items-center justify-center"><i class="fas fa-check text-xs"></i></button>
+                            <button class="w-7 h-7 bg-red-100 text-red-600 rounded flex items-center justify-center"><i class="fas fa-times text-xs"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `</div>
+                <h3 class="font-bold text-sm text-gray-700 mb-2">Active Users</h3>
+                <div class="bg-white rounded-xl border border-gray-100 overflow-hidden">
+                    ${DB.users.filter(u => u.status === 'active').map(u => `
+                        <div class="p-3 border-b border-gray-50 flex justify-between items-center text-xs">
+                            <span class="font-bold text-gray-700">${u.name}</span>
+                            <span class="bg-gray-100 px-2 py-0.5 rounded text-gray-500">${u.role}</span>
                         </div>
                     `).join('')}
                 </div>
-
-                <h3 class="font-bold text-gray-700 mb-3 px-1">ความพึงพอใจการให้บริการ</h3>
-                <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 mb-6 flex items-center justify-between">
-                    <div class="text-center">
-                        <div class="text-4xl font-bold text-yellow-500">4.8</div>
-                        <div class="text-[10px] text-gray-400">จาก 5.0</div>
-                        <div class="text-yellow-400 text-xs">★★★★★</div>
-                    </div>
-                    <div class="flex-1 pl-6 space-y-1">
-                        <div class="flex items-center gap-2 text-[10px] text-gray-500">
-                            <span>5★</span>
-                            <div class="flex-1 h-1.5 bg-gray-100 rounded-full"><div class="w-[80%] h-full bg-yellow-400 rounded-full"></div></div>
-                        </div>
-                        <div class="flex items-center gap-2 text-[10px] text-gray-500">
-                            <span>4★</span>
-                            <div class="flex-1 h-1.5 bg-gray-100 rounded-full"><div class="w-[15%] h-full bg-yellow-400 rounded-full"></div></div>
-                        </div>
-                        <div class="flex items-center gap-2 text-[10px] text-gray-500">
-                            <span>3★</span>
-                            <div class="flex-1 h-1.5 bg-gray-100 rounded-full"><div class="w-[5%] h-full bg-yellow-400 rounded-full"></div></div>
-                        </div>
-                    </div>
-                </div>
-            `;
+            </div>`;
+            main.innerHTML = html;
         }
 
-        function renderExecutiveBroken() {
+        function approveUser(id) {
+            const u = DB.users.find(u => u.id === id);
+            u.status = 'active';
+            Swal.fire('Approved', `${u.name} is now active`, 'success');
+            renderAdminUsers();
+        }
+
+        function renderAdminStock() {
+            const main = document.getElementById('main-view');
+            let html = `<div class="px-4 py-2"><h2 class="font-bold text-lg mb-3">Stock Management</h2><div class="space-y-2">`;
+            
+            DB.assets.forEach(a => {
+                html += `
+                    <div class="bg-white p-3 rounded-xl border border-gray-100 shadow-sm flex items-center gap-3">
+                        <div class="w-10 h-10 bg-gray-50 rounded flex items-center justify-center text-xl">${a.img}</div>
+                        <div class="flex-1">
+                            <div class="font-bold text-sm">${a.name}</div>
+                            <div class="text-[10px] text-gray-400">Total: ${a.stock}</div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="updateStock(${a.id}, -1)" class="w-6 h-6 bg-gray-100 rounded text-gray-600 font-bold">-</button>
+                            <span class="text-xs font-bold w-4 text-center" id="stock-${a.id}">${a.stock}</span>
+                            <button onclick="updateStock(${a.id}, 1)" class="w-6 h-6 bg-gray-100 rounded text-blue-600 font-bold">+</button>
+                        </div>
+                    </div>
+                `;
+            });
+            html += `</div></div>`;
+            main.innerHTML = html;
+        }
+
+        function updateStock(id, delta) {
+            const asset = DB.assets.find(a => a.id === id);
+            asset.stock += delta;
+            renderAdminStock();
+        }
+
+        // ==========================================
+        // VIEW: EXECUTIVE
+        // ==========================================
+        function renderExecDashboard() {
             const main = document.getElementById('main-view');
             main.innerHTML = `
-                <h2 class="text-lg font-bold text-gray-800 mb-4 px-2">รายงานความเสียหาย (Lost/Damaged)</h2>
-                
-                <div class="flex gap-3 mb-6">
-                    <div class="flex-1 bg-red-50 p-3 rounded-xl border border-red-100 text-center">
-                        <div class="text-2xl font-bold text-red-600">3</div>
-                        <div class="text-[10px] text-red-400">แจ้งซ่อมใหม่</div>
+                <div class="px-4 py-2">
+                    <div class="bg-gradient-to-br from-indigo-900 to-purple-900 rounded-xl p-4 text-white shadow-lg mb-4">
+                        <h2 class="text-xs font-bold text-indigo-200 mb-1 uppercase">Social Impact (Month)</h2>
+                        <div class="flex items-baseline gap-2 mb-3">
+                            <span class="text-3xl font-bold">1,248</span>
+                            <span class="text-xs text-indigo-200">Transactions</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 text-xs border-t border-indigo-700 pt-3">
+                            <div>
+                                <span class="block text-indigo-300">Beneficiaries</span>
+                                <span class="font-bold text-lg">~5k People</span>
+                            </div>
+                            <div>
+                                <span class="block text-indigo-300">Budget Saved</span>
+                                <span class="font-bold text-lg">฿ 2.5M</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="flex-1 bg-orange-50 p-3 rounded-xl border border-orange-100 text-center">
-                        <div class="text-2xl font-bold text-orange-600">1</div>
-                        <div class="text-[10px] text-orange-400">สูญหาย</div>
-                    </div>
-                    <div class="flex-1 bg-green-50 p-3 rounded-xl border border-green-100 text-center">
-                        <div class="text-2xl font-bold text-green-600">12</div>
-                        <div class="text-[10px] text-green-400">ซ่อมเสร็จ</div>
-                    </div>
-                </div>
 
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-gray-50 text-gray-500 text-[10px] uppercase">
-                            <tr>
-                                <th class="p-3 font-bold">รายการ</th>
-                                <th class="p-3 font-bold">อาการ/ปัญหา</th>
-                                <th class="p-3 font-bold">ผู้แจ้ง</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100">
-                            ${DB.broken_logs.map(log => `
-                                <tr>
-                                    <td class="p-3 font-bold text-gray-700 text-xs">${log.item}</td>
-                                    <td class="p-3 text-xs text-red-500">${log.issue}</td>
-                                    <td class="p-3 text-[10px] text-gray-400">
-                                        ${log.reporter}<br>${log.date}
-                                    </td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                    <div class="p-3 text-center text-xs text-blue-600 font-bold border-t border-gray-100 cursor-pointer">
-                        ดูประวัติย้อนหลังทั้งหมด
+                    <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm mb-4">
+                        <h3 class="font-bold text-sm text-gray-700 mb-2">Category Utilization</h3>
+                        <canvas id="utilChart" height="200"></canvas>
+                    </div>
+
+                    <h3 class="font-bold text-sm text-gray-700 mb-2">Top 5 Popular Items</h3>
+                    <div class="space-y-2 mb-6">
+                        ${DB.assets.sort((a,b) => b.pop - a.pop).slice(0,5).map(a => `
+                            <div class="bg-white p-2 rounded-lg border border-gray-100 shadow-sm">
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="font-bold text-gray-700">${a.img} ${a.name}</span>
+                                    <span class="text-blue-600 font-bold">${a.pop}%</span>
+                                </div>
+                                <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                    <div class="h-full bg-blue-500 rounded-full" style="width: ${a.pop}%"></div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <h3 class="font-bold text-sm text-gray-700 mb-2">Damage Report</h3>
+                    <div class="bg-white rounded-xl border border-gray-100 overflow-hidden">
+                         <table class="w-full text-left text-[10px]">
+                            <thead class="bg-gray-50 text-gray-500 uppercase">
+                                <tr><th class="p-2">Item</th><th class="p-2">Issue</th><th class="p-2">Date</th></tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-50">
+                                <tr><td class="p-2">เก้าอี้พลาสติก</td><td class="p-2 text-red-500">ขาหัก</td><td class="p-2 text-gray-400">Jan 20</td></tr>
+                                <tr><td class="p-2">ไมค์ลอย</td><td class="p-2 text-red-500">ตกน้ำ</td><td class="p-2 text-gray-400">Jan 18</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             `;
+            
+            // Init Chart
+            setTimeout(() => {
+                const ctx = document.getElementById('utilChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Furniture', 'Tech', 'Outdoor', 'Audio'],
+                        datasets: [{
+                            data: [300, 50, 100, 40],
+                            backgroundColor: ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: { plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: {size: 10} } } } }
+                });
+            }, 100);
         }
 
-        // --- Start App ---
-        init();
+        // --- INIT ---
+        setRole('user'); // Start as User
 
     </script>
 </body>
