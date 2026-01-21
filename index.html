@@ -3,908 +3,763 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Klongtoey Smart Asset - Master Demo</title>
+    <title>Smart Asset - Final Full Scale</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
         
         body {
             font-family: 'Sarabun', sans-serif;
-            background: #111827; /* Dark BG for presentation focus */
+            background: #0f172a;
             height: 100vh;
             margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             overflow: hidden;
+            user-select: none;
         }
 
-        /* --- DEVICE FRAME (iPhone 14 Pro Style) --- */
+        /* DEVICE FRAME */
         .device-frame {
             width: 400px;
-            height: 850px;
-            background: black;
-            border-radius: 50px;
-            border: 12px solid #333;
+            height: 880px; /* สูงขึ้นนิดหน่อยเพื่อพื้นที่ */
+            background: #000;
+            border-radius: 55px;
+            border: 14px solid #333;
             position: relative;
-            box-shadow: 0 0 50px rgba(0,0,0,0.5);
-            overflow: hidden;
+            box-shadow: 0 0 80px rgba(0,0,0,0.6);
             display: flex;
             flex-direction: column;
+            overflow: hidden;
+            z-index: 10;
         }
 
-        /* Dynamic Island */
         .dynamic-island {
             position: absolute;
-            top: 10px;
+            top: 12px;
             left: 50%;
             transform: translateX(-50%);
-            width: 120px;
-            height: 35px;
-            background: black;
+            width: 126px;
+            height: 37px;
+            background: #000;
             border-radius: 20px;
             z-index: 999;
         }
 
-        /* --- OS SIMULATION LAYERS --- */
+        .status-bar {
+            height: 50px;
+            padding: 0 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: #000;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(5px);
+            z-index: 100;
+            padding-top: 10px;
+        }
+
+        /* NOTIFICATION */
+        .notification-banner {
+            position: absolute;
+            top: -120px;
+            left: 12px;
+            right: 12px;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 18px;
+            padding: 12px 16px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            z-index: 1000;
+            display: flex;
+            gap: 12px;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            cursor: pointer;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .notification-banner.show { top: 60px; }
+
+        /* APP LAYOUT */
         .screen-layer {
             flex: 1;
-            background: #f3f4f6;
+            background: #f8fafc;
             overflow: hidden;
             display: flex;
             flex-direction: column;
             position: relative;
         }
 
-        /* Fake Status Bar */
-        .status-bar {
-            height: 44px;
-            padding: 0 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 12px;
-            font-weight: 600;
-            color: #000;
-            background: rgba(255,255,255,0.8);
-            backdrop-filter: blur(5px);
-            z-index: 100;
+        .app-content { 
+            flex: 1; 
+            overflow-y: auto; 
+            overflow-x: hidden;
+            padding-bottom: 100px; 
         }
+        .app-content::-webkit-scrollbar { display: none; }
 
-        /* Notification Banner */
-        .notification-banner {
-            position: absolute;
-            top: -100px;
-            left: 10px;
-            right: 10px;
-            background: rgba(255,255,255,0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            z-index: 1000;
-            display: flex;
-            gap: 12px;
-            transition: top 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            cursor: pointer;
-        }
-        .notification-banner.show { top: 55px; }
-
-        /* --- APP: SMART ASSET UI --- */
-        #app-smart-asset { height: 100%; display: flex; flex-direction: column; }
-        .app-content { flex: 1; overflow-y: auto; padding-bottom: 80px; }
-        .app-content::-webkit-scrollbar { width: 0; }
-        
-        /* Bottom Tab Bar */
         .tab-bar {
-            height: 70px;
-            background: white;
-            border-top: 1px solid #e5e7eb;
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 85px;
+            background: rgba(255,255,255,0.98);
+            border-top: 1px solid #e2e8f0;
             display: flex;
             justify-content: space-around;
             align-items: center;
-            padding-bottom: 20px; /* Safe area */
+            padding-bottom: 25px;
+            z-index: 50;
         }
         .tab-item {
             flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
             font-size: 10px;
-            color: #9ca3af;
+            color: #94a3b8;
             transition: 0.2s;
             cursor: pointer;
+            height: 100%;
         }
-        .tab-item.active { color: #2563eb; transform: translateY(-2px); }
-        .tab-item i { font-size: 20px; margin-bottom: 4px; }
+        .tab-item.active { color: #2563eb; transform: translateY(-2px); font-weight: 700; }
+        .tab-item i { font-size: 24px; margin-bottom: 4px; }
+        .tab-item:active { transform: scale(0.9); }
 
-        /* --- APP: LINE CHAT UI --- */
+        /* LINE APP */
         #app-line { 
             height: 100%; 
             background: #849ebf; 
             display: none; 
             flex-direction: column; 
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 200;
         }
-        .chat-header { background: #2c3e50; color: white; padding: 15px; display: flex; align-items: center; gap: 10px; }
-        .chat-area { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        
-        .chat-bubble {
-            max-width: 80%;
-            padding: 10px 15px;
-            border-radius: 15px;
-            font-size: 14px;
-            position: relative;
-            animation: fadeIn 0.3s;
-        }
-        .chat-bubble.left { background: white; color: black; align-self: flex-start; border-top-left-radius: 2px; }
-        .chat-bubble.right { background: #92d050; color: black; align-self: flex-end; border-top-right-radius: 2px; }
 
-        /* Flex Message Simulation */
-        .flex-msg { background: white; border-radius: 10px; overflow: hidden; width: 240px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .flex-header { background: #2563eb; color: white; padding: 10px; font-weight: bold; }
-        .flex-body { padding: 15px; }
-        .flex-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px; }
-        .flex-btn { display: block; width: 100%; padding: 10px; text-align: center; color: #2563eb; border-top: 1px solid #eee; font-weight: bold; font-size: 14px; cursor: pointer; }
-
-        /* Animations */
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* Floating Role Switcher */
+        /* ROLE SWITCHER */
         .role-switcher {
             position: absolute;
-            bottom: 20px;
+            bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0,0,0,0.8);
-            border-radius: 30px;
-            padding: 5px;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 40px;
+            padding: 8px;
             display: flex;
-            gap: 5px;
-            z-index: 2000;
+            gap: 12px;
+            z-index: 20;
         }
         .role-btn {
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             border: none;
             color: white;
-            font-size: 16px;
+            font-size: 20px;
             cursor: pointer;
-            transition: 0.2s;
+            transition: all 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
-        .role-btn:hover { transform: scale(1.1); }
-        .role-btn.active { box-shadow: 0 0 10px white; }
+        .role-btn:hover { transform: translateY(-5px); }
+        .role-btn.active { box-shadow: 0 0 20px currentColor; transform: scale(1.15); border: 2px solid white; }
+        .role-btn::after {
+            content: attr(data-label);
+            position: absolute;
+            bottom: -25px;
+            font-size: 10px;
+            opacity: 0;
+            transition: 0.2s;
+            white-space: nowrap;
+            font-weight: bold;
+            text-shadow: 0 1px 2px black;
+        }
+        .role-btn:hover::after { opacity: 1; bottom: -30px; }
 
-        /* Utility */
-        .hidden { display: none !important; }
+        .fade-in { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body>
 
     <div class="device-frame">
         <div class="dynamic-island"></div>
-        
         <div class="status-bar">
-            <span id="clock">12:00</span>
-            <div class="flex gap-1.5">
-                <i class="fas fa-signal"></i>
-                <i class="fas fa-wifi"></i>
-                <i class="fas fa-battery-full"></i>
+            <span id="clock" class="font-mono">10:00</span>
+            <div class="flex gap-1.5 text-xs">
+                <i class="fas fa-signal"></i><i class="fas fa-wifi"></i><i class="fas fa-battery-full"></i>
             </div>
         </div>
 
         <div id="notification" class="notification-banner" onclick="openLineApp()">
-            <div class="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center text-white text-xl">
-                <i class="fab fa-line"></i>
-            </div>
-            <div class="flex-1">
-                <div class="flex justify-between items-center mb-1">
-                    <span class="font-bold text-xs">LINE • Now</span>
-                </div>
-                <div class="font-bold text-sm">Klongtoey Smart Asset</div>
-                <div class="text-xs text-gray-500" id="notif-text">มีรายการแจ้งเตือนใหม่...</div>
+            <div class="w-10 h-10 bg-[#06c755] rounded-xl flex items-center justify-center text-white text-2xl shadow-sm"><i class="fab fa-line"></i></div>
+            <div class="flex-1 min-w-0">
+                <div class="flex justify-between items-center mb-0.5"><span class="font-bold text-xs text-gray-800">LINE</span><span class="text-[10px] text-gray-500">Now</span></div>
+                <div class="font-semibold text-sm text-gray-900 truncate">Klongtoey Smart Asset</div>
+                <div class="text-xs text-gray-500 truncate" id="notif-text">ข้อความใหม่...</div>
             </div>
         </div>
 
         <div class="screen-layer">
-            
-            <div id="app-smart-asset">
-                <header class="bg-white px-4 py-3 shadow-sm flex justify-between items-center z-10">
+            <div id="app-smart-asset" class="h-full flex flex-col">
+                <header class="bg-white/90 backdrop-blur-md px-5 py-4 shadow-sm flex justify-between items-center sticky top-0 z-40 transition-all">
                     <div>
-                        <h1 class="font-bold text-lg text-gray-800" id="header-title">บริการพัสดุ</h1>
-                        <span class="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-500" id="role-badge">User</span>
+                        <h1 class="font-bold text-xl text-slate-800" id="header-title">บริการพัสดุ</h1>
+                        <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 font-semibold tracking-wide" id="role-badge">USER MODE</span>
                     </div>
-                    <div class="w-8 h-8 rounded-full bg-gray-200 overflow-hidden border border-gray-300">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="Profile">
+                    <div id="admin-action-btn" class="hidden">
+                        <button onclick="adminAddAsset()" class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-lg active:scale-90 transition"><i class="fas fa-plus"></i></button>
+                    </div>
+                    <div id="profile-btn" class="relative group cursor-pointer" onclick="Swal.fire('Profile', 'User: นายสมชาย<br>Credit: A+', 'info')">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 p-[2px]">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" class="rounded-full bg-white h-full w-full">
+                        </div>
                     </div>
                 </header>
 
-                <div class="app-content" id="main-view">
-                    </div>
-
-                <div class="tab-bar" id="tab-bar">
-                    </div>
+                <div class="app-content" id="main-view"></div>
+                <div class="tab-bar" id="tab-bar"></div>
             </div>
 
             <div id="app-line">
-                <div class="chat-header">
-                    <i class="fas fa-chevron-left cursor-pointer" onclick="closeLineApp()"></i>
-                    <h3 class="font-bold">Klongtoey Smart Asset (Bot)</h3>
+                <div class="bg-[#212b36] text-white p-4 pt-12 flex items-center gap-3 shadow-md z-10">
+                    <i class="fas fa-chevron-left text-xl cursor-pointer p-2" onclick="closeLineApp()"></i>
+                    <div class="flex-1"><h3 class="font-bold text-base">Klongtoey Asset Bot</h3><span class="text-[10px] bg-green-500/20 text-green-400 px-1.5 rounded">Official Account</span></div>
                 </div>
-                <div class="chat-area" id="chat-history">
-                    </div>
-                <div class="bg-white p-3 flex gap-2 items-center">
-                    <i class="fas fa-plus text-gray-400"></i>
-                    <i class="fas fa-camera text-gray-400"></i>
-                    <i class="fas fa-image text-gray-400"></i>
-                    <input type="text" placeholder="Aa" class="flex-1 bg-gray-100 rounded-full px-3 py-1.5 text-sm outline-none" disabled>
-                    <i class="fas fa-microphone text-gray-400"></i>
+                <div class="flex-1 p-4 overflow-y-auto flex flex-col gap-4 bg-[#849ebf]" id="chat-history"></div>
+                <div class="bg-white p-2 pb-8 flex items-center gap-2 border-t border-gray-300">
+                    <i class="fas fa-plus text-[#212b36] p-2 text-xl"></i><input type="text" placeholder="Aa" class="flex-1 bg-gray-100 rounded-full h-9 px-4 text-sm" disabled><i class="fas fa-microphone text-[#212b36] p-2 text-xl"></i>
                 </div>
             </div>
-
         </div>
     </div>
 
     <div class="role-switcher">
-        <button class="role-btn bg-blue-500 active" onclick="setRole('user')" title="User"><i class="fas fa-user"></i></button>
-        <button class="role-btn bg-green-500" onclick="setRole('staff')" title="Staff"><i class="fas fa-id-badge"></i></button>
-        <button class="role-btn bg-orange-500" onclick="setRole('admin')" title="Admin"><i class="fas fa-tools"></i></button>
-        <button class="role-btn bg-purple-500" onclick="setRole('exec')" title="Executive"><i class="fas fa-chart-pie"></i></button>
+        <button class="role-btn bg-blue-500 active" onclick="switchRole('user')" data-label="User"><i class="fas fa-user"></i></button>
+        <button class="role-btn bg-green-500" onclick="switchRole('staff')" data-label="Staff"><i class="fas fa-id-badge"></i></button>
+        <button class="role-btn bg-orange-500" onclick="switchRole('admin')" data-label="Admin"><i class="fas fa-tools"></i></button>
+        <button class="role-btn bg-purple-500" onclick="switchRole('exec')" data-label="Executive"><i class="fas fa-chart-line"></i></button>
     </div>
 
     <script>
-        // --- REALTIME CLOCK ---
-        setInterval(() => {
-            document.getElementById('clock').innerText = moment().format('HH:mm');
-        }, 1000);
-
-        // --- DATABASE (MOCK) ---
+        // --- BIG DATA MOCKUP (28+ รายการตามสั่ง) ---
         const DB = {
-            users: [
-                { id: 'U1', name: 'นายสมชาย', role: 'user', dept: 'ชุมชนหมู่ 1', status: 'active' },
-                { id: 'U2', name: 'น.ส.ใจดี', role: 'staff', dept: 'ฝ่ายพัสดุ', status: 'active' },
-                { id: 'U3', name: 'นาย A (รออนุมัติ)', role: 'user', dept: 'ประชาชน', status: 'pending' }
-            ],
             assets: [
-                { id: 1, name: "เก้าอี้พลาสติก (ขาว)", stock: 500, available: 450, img: "🪑", cat: "furniture", pop: 95 },
-                { id: 2, name: "โต๊ะพับหน้าขาว 1.5ม.", stock: 100, available: 80, img: "🟫", cat: "furniture", pop: 80 },
-                { id: 3, name: "เต็นท์ผ้าใบ 3x3m", stock: 20, available: 2, img: "⛺", cat: "outdoor", pop: 99 },
-                { id: 4, name: "โปรเจคเตอร์ Epson", stock: 5, available: 4, img: "📽️", cat: "tech", pop: 60 },
-                { id: 5, name: "ไมโครโฟนไร้สาย", stock: 10, available: 10, img: "🎤", cat: "audio", pop: 70 },
-                { id: 6, name: "ชุดเครื่องเสียงสนาม", stock: 4, available: 0, img: "🔊", cat: "audio", pop: 85 },
-                { id: 7, name: "แผงกั้นจราจร", stock: 50, available: 40, img: "🚧", cat: "tool", pop: 30 },
-                { id: 8, name: "พัดลมไอน้ำ", stock: 10, available: 8, img: "💨", cat: "outdoor", pop: 50 }
+                // Furniture
+                { id: 1, name: "เก้าอี้พลาสติก (ขาว)", stock: 500, available: 450, img: "🪑", cat: "fur", badge: "Hot" },
+                { id: 2, name: "เก้าอี้พลาสติก (แดง)", stock: 200, available: 180, img: "🪑", cat: "fur", badge: "" },
+                { id: 3, name: "โต๊ะพับหน้าขาว 1.2ม.", stock: 100, available: 20, img: "🟫", cat: "fur", badge: "Low Stock" },
+                { id: 4, name: "โต๊ะกลมจีน", stock: 50, available: 45, img: "⭕", cat: "fur", badge: "" },
+                { id: 5, name: "โซฟารับแขก (ชุด)", stock: 5, available: 2, img: "🛋️", cat: "fur", badge: "" },
+                { id: 24, name: "โพเดียมอะคริลิค", stock: 2, available: 2, img: "🎤", cat: "fur", badge: "New" },
+                { id: 25, name: "พรมแดง (ม้วน)", stock: 10, available: 8, img: "🧶", cat: "fur", badge: "" },
+                // Tech
+                { id: 6, name: "โปรเจคเตอร์ Epson", stock: 10, available: 8, img: "📽️", cat: "tech", badge: "Best" },
+                { id: 7, name: "จอรับภาพ 100 นิ้ว", stock: 10, available: 9, img: "⬜", cat: "tech", badge: "" },
+                { id: 8, name: "สาย HDMI ยาว 10ม.", stock: 20, available: 15, img: "🔌", cat: "tech", badge: "" },
+                { id: 9, name: "ปลั๊กพ่วง 5 เมตร", stock: 30, available: 25, img: "⚡", cat: "tech", badge: "" },
+                { id: 26, name: "Pointer นำเสนอ", stock: 5, available: 5, img: "🖊️", cat: "tech", badge: "" },
+                // Audio
+                { id: 10, name: "ชุดเครื่องเสียงสนาม", stock: 4, available: 1, img: "🔊", cat: "audio", badge: "Low Stock" },
+                { id: 11, name: "ไมโครโฟนไร้สาย (คู่)", stock: 15, available: 10, img: "🎤", cat: "audio", badge: "Hot" },
+                { id: 12, name: "ขาตั้งไมค์", stock: 20, available: 18, img: "🎙️", cat: "audio", badge: "" },
+                { id: 13, name: "ลำโพงบลูทูธพกพา", stock: 10, available: 10, img: "📻", cat: "audio", badge: "" },
+                // Outdoor
+                { id: 14, name: "เต็นท์ผ้าใบ 3x3m", stock: 50, available: 0, img: "⛺", cat: "out", badge: "Out of Stock" },
+                { id: 15, name: "เต็นท์ผ้าใบ 5x5m", stock: 20, available: 5, img: "🎪", cat: "out", badge: "" },
+                { id: 16, name: "พัดลมไอน้ำอุตสาหกรรม", stock: 15, available: 12, img: "💨", cat: "out", badge: "Popular" },
+                { id: 17, name: "กระติกน้ำแข็ง 100L", stock: 10, available: 8, img: "🧊", cat: "out", badge: "" },
+                { id: 27, name: "ร่มสนามขนาดใหญ่", stock: 30, available: 25, img: "⛱️", cat: "out", badge: "" },
+                // Traffic
+                { id: 18, name: "แผงกั้นจราจร", stock: 100, available: 80, img: "🚧", cat: "traf", badge: "" },
+                { id: 19, name: "กรวยจราจร", stock: 200, available: 150, img: "⚠️", cat: "traf", badge: "" },
+                { id: 20, name: "ไฟกระพริบโซล่าเซลล์", stock: 50, available: 48, img: "🚨", cat: "traf", badge: "" },
+                // Tools
+                { id: 21, name: "รถเข็นพัสดุ", stock: 5, available: 2, img: "🛒", cat: "tool", badge: "" },
+                { id: 22, name: "บันไดอลูมิเนียม", stock: 3, available: 3, img: "🪜", cat: "tool", badge: "" },
+                { id: 23, name: "สว่านไร้สาย", stock: 5, available: 1, img: "🔩", cat: "tool", badge: "Maintain" },
+            ],
+            users: [
+                { id: 'U001', name: 'สมชาย รักดี', role: 'User', status: true },
+                { id: 'U002', name: 'สมหญิง จริงใจ', role: 'User', status: false },
+                { id: 'U003', name: 'Admin Klongtoey', role: 'Staff', status: true },
             ],
             requests: [
-                { id: 'R-099', user: 'นายสมชาย', items: [{name: 'เต็นท์ผ้าใบ 3x3m', qty: 2}], status: 'approved', date: 'Yesterday' },
+                { id: 'R-998', user: 'สมหญิง จริงใจ', items: 'เต็นท์ผ้าใบ x2', status: 'pending', date: '09:30' },
+                { id: 'R-997', user: 'วิชัย การช่าง', items: 'รถเข็นพัสดุ x1', status: 'approved', date: '08:45' },
             ],
-            logs: [
-                { time: '10:00', actor: 'System', action: 'Auto-backup completed' },
-                { time: '09:45', actor: 'น.ส.ใจดี', action: 'Approved R-099' }
+            // เพิ่ม Damage Report ให้ผู้บริหาร
+            damages: [
+                { id: 'D-01', item: 'เต็นท์ 3x3', issue: 'ผ้าใบขาด', reporter: 'ชุมชน 70 ไร่', status: 'รอซ่อม' },
+                { id: 'D-02', item: 'ไมโครโฟน', issue: 'เปิดไม่ติด', reporter: 'ฝ่ายทะเบียน', status: 'ส่งศูนย์' },
+                { id: 'D-03', item: 'เก้าอี้', issue: 'ขาหัก', reporter: 'งานกวาด', status: 'แทงจำหน่าย' },
             ]
         };
 
-        let STATE = {
-            role: 'user',
-            cart: [],
-            currentApp: 'asset' // asset, line
+        let STATE = { role: 'user', currentTab: 'home', cart: [], currentCategory: 'all', searchQuery: '' };
+
+        window.onload = () => {
+            setInterval(() => document.getElementById('clock').innerText = moment().format('HH:mm'), 1000);
+            switchRole('user');
         };
 
-        // --- CORE FUNCTIONS ---
-
-        function setRole(role) {
+        // --- NAVIGATION & ROLE ---
+        function switchRole(role) {
             STATE.role = role;
-            
-            // Update UI Badges
-            document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
-            document.querySelector(`.role-btn[onclick="setRole('${role}')"]`).classList.add('active');
-            
+            // Default tabs per role
+            if(role === 'user') STATE.currentTab = 'home';
+            else if(role === 'staff') STATE.currentTab = 'dash';
+            else if(role === 'admin') STATE.currentTab = 'stock'; // Admin เน้นดูของ
+            else STATE.currentTab = 'overview';
+
+            // Update UI
+            document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.role-btn[onclick="switchRole('${role}')"]`).classList.add('active');
+
             const badge = document.getElementById('role-badge');
             const title = document.getElementById('header-title');
-            
-            if(role === 'user') { badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-blue-100 text-blue-600"; badge.innerText = "User"; title.innerText = "ยืมพัสดุ"; }
-            else if(role === 'staff') { badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-green-100 text-green-600"; badge.innerText = "Staff L2"; title.innerText = "เจ้าหน้าที่"; }
-            else if(role === 'admin') { badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-orange-100 text-orange-600"; badge.innerText = "Admin"; title.innerText = "ผู้ดูแลระบบ"; }
-            else { badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-purple-100 text-purple-600"; badge.innerText = "Executive"; title.innerText = "ผู้บริหาร"; }
+            const adminBtn = document.getElementById('admin-action-btn');
+            const profileBtn = document.getElementById('profile-btn');
 
-            // Reset View
-            closeLineApp();
-            renderTabs();
-            // Default views per role
-            if(role === 'user') renderUserHome();
-            else if(role === 'staff') renderStaffDashboard();
-            else if(role === 'admin') renderAdminUsers();
-            else renderExecDashboard();
-        }
-
-        function triggerNotification(text, type = 'info') {
-            const banner = document.getElementById('notification');
-            document.getElementById('notif-text').innerText = text;
-            banner.classList.add('show');
-            
-            // Auto hide
-            setTimeout(() => { banner.classList.remove('show'); }, 4000);
-
-            // Add to Line Chat History automatically
-            addChatMessage('bot', text, type);
-        }
-
-        function openLineApp() {
-            document.getElementById('app-smart-asset').style.display = 'none';
-            document.getElementById('app-line').style.display = 'flex';
-            document.getElementById('notification').classList.remove('show');
-            STATE.currentApp = 'line';
-        }
-
-        function closeLineApp() {
-            document.getElementById('app-smart-asset').style.display = 'flex';
-            document.getElementById('app-line').style.display = 'none';
-            STATE.currentApp = 'asset';
-        }
-
-        function addChatMessage(sender, text, type = 'text') {
-            const chat = document.getElementById('chat-history');
-            let html = '';
-            
-            if(sender === 'bot') {
-                if(type === 'flex-request') {
-                    html = `
-                        <div class="chat-bubble left p-0 bg-transparent animate__animated animate__fadeInLeft">
-                            <div class="flex-msg">
-                                <div class="flex-header">🛒 รายการคำขอยืม</div>
-                                <div class="flex-body">
-                                    <div class="font-bold mb-2 text-gray-800">ยืนยันรายการยืมพัสดุ</div>
-                                    <div class="flex-row text-gray-500"><span>User:</span><span>${DB.users[0].name}</span></div>
-                                    <div class="flex-row text-gray-500"><span>Items:</span><span>${text}</span></div>
-                                    <div class="flex-row text-orange-500 font-bold"><span>Status:</span><span>รออนุมัติ</span></div>
-                                </div>
-                                <div class="flex-btn" onclick="closeLineApp()">กลับไปที่แอป</div>
-                            </div>
-                        </div>`;
-                } else if (type === 'flex-approve') {
-                    html = `
-                        <div class="chat-bubble left p-0 bg-transparent animate__animated animate__fadeInLeft">
-                            <div class="flex-msg">
-                                <div class="flex-header bg-green-500">✅ อนุมัติแล้ว</div>
-                                <div class="flex-body">
-                                    <div class="font-bold mb-2 text-gray-800">พร้อมรับของ</div>
-                                    <div class="text-xs text-gray-500 mb-2">เจ้าหน้าที่อนุมัติรายการยืมของคุณแล้ว กรุณาสแกน QR เพื่อรับของ</div>
-                                </div>
-                                <div class="flex-btn text-green-600" onclick="closeLineApp(); setRole('user'); renderUserStatus();">เปิด QR Code</div>
-                            </div>
-                        </div>`;
-                } else {
-                    html = `<div class="chat-bubble left">${text}</div>`;
-                }
+            if(role === 'user') {
+                badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 font-bold";
+                badge.innerText = "USER";
+                title.innerText = "บริการยืมพัสดุ";
+                adminBtn.classList.add('hidden');
+                profileBtn.classList.remove('hidden');
+            } else if(role === 'staff') {
+                badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-green-100 text-green-600 font-bold";
+                badge.innerText = "STAFF";
+                title.innerText = "เจ้าหน้าที่พัสดุ";
+                adminBtn.classList.add('hidden');
+                profileBtn.classList.remove('hidden');
+            } else if(role === 'admin') {
+                badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-orange-100 text-orange-600 font-bold";
+                badge.innerText = "ADMIN";
+                title.innerText = "คลังพัสดุ";
+                adminBtn.classList.remove('hidden'); // Admin เห็นปุ่ม +
+                profileBtn.classList.add('hidden');
             } else {
-                html = `<div class="chat-bubble right">${text}</div>`;
+                badge.className = "text-[10px] px-2 py-0.5 rounded-full bg-purple-100 text-purple-600 font-bold";
+                badge.innerText = "EXECUTIVE";
+                title.innerText = "Dashboard";
+                adminBtn.classList.add('hidden');
+                profileBtn.classList.add('hidden');
             }
-            
-            chat.innerHTML += html;
-            chat.scrollTop = chat.scrollHeight;
+
+            closeLineApp();
+            renderView();
+        }
+
+        function renderView() {
+            renderTabs();
+            const container = document.getElementById('main-view');
+            container.innerHTML = ''; 
+
+            if(STATE.role === 'user') {
+                if(STATE.currentTab === 'home') renderUserHome(container);
+                else if(STATE.currentTab === 'cart') renderUserCart(container);
+                else if(STATE.currentTab === 'status') renderUserStatus(container);
+            } else if(STATE.role === 'staff') {
+                if(STATE.currentTab === 'dash') renderStaffDash(container);
+                else if(STATE.currentTab === 'tasks') renderStaffTasks(container);
+                else if(STATE.currentTab === 'handover') renderStaffHandover(container);
+                else if(STATE.currentTab === 'scan') renderStaffScan(container);
+            } else if(STATE.role === 'admin') {
+                if(STATE.currentTab === 'stock') renderAdminStock(container);
+                else if(STATE.currentTab === 'users') renderAdminUsers(container);
+            } else {
+                renderExecDash(container);
+            }
         }
 
         function renderTabs() {
             const nav = document.getElementById('tab-bar');
-            let html = '';
-            
-            if (STATE.role === 'user') {
-                html = `
-                    <div onclick="renderUserHome()" class="tab-item"><i class="fas fa-home"></i>หน้าแรก</div>
-                    <div onclick="renderUserCart()" class="tab-item relative">
-                        <i class="fas fa-shopping-basket"></i>ตะกร้า
-                        ${STATE.cart.length > 0 ? `<div class="absolute top-0 right-8 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-[9px]">${STATE.cart.length}</div>` : ''}
-                    </div>
-                    <div onclick="renderUserStatus()" class="tab-item"><i class="fas fa-tasks"></i>สถานะ</div>
-                    <div class="tab-item"><i class="fas fa-user"></i>โปรไฟล์</div>
-                `;
-            } else if (STATE.role === 'staff') {
-                html = `
-                    <div onclick="renderStaffDashboard()" class="tab-item"><i class="fas fa-chart-pie"></i>ภาพรวม</div>
-                    <div onclick="renderStaffTasks()" class="tab-item relative">
-                        <i class="fas fa-clipboard-check"></i>อนุมัติ
-                        ${DB.requests.filter(r => r.status === 'pending').length > 0 ? '<div class="absolute top-0 right-8 w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>' : ''}
-                    </div>
-                    <div onclick="renderScanner()" class="tab-item text-blue-600"><i class="fas fa-qrcode text-3xl"></i></div>
-                    <div class="tab-item"><i class="fas fa-history"></i>ประวัติ</div>
-                `;
-            } else if (STATE.role === 'admin') {
-                html = `
-                    <div onclick="renderAdminUsers()" class="tab-item"><i class="fas fa-users-cog"></i>ผู้ใช้</div>
-                    <div onclick="renderAdminStock()" class="tab-item"><i class="fas fa-boxes"></i>คลัง</div>
-                    <div class="tab-item"><i class="fas fa-file-alt"></i>Logs</div>
-                `;
-            } else if (STATE.role === 'exec') {
-                html = `
-                    <div onclick="renderExecDashboard()" class="tab-item"><i class="fas fa-chart-line"></i>Overview</div>
-                    <div class="tab-item"><i class="fas fa-tools"></i>Report</div>
-                `;
+            let tabs = [];
+            const pendingReq = DB.requests.filter(r=>r.status==='pending').length;
+            const approvedReq = DB.requests.filter(r=>r.status==='approved').length;
+
+            if(STATE.role === 'user') {
+                tabs = [
+                    { id: 'home', icon: 'fa-home', name: 'หน้าแรก' },
+                    { id: 'cart', icon: 'fa-shopping-basket', name: 'ตะกร้า', badge: STATE.cart.length },
+                    { id: 'status', icon: 'fa-clipboard-list', name: 'สถานะ' }
+                ];
+            } else if(STATE.role === 'staff') {
+                tabs = [
+                    { id: 'dash', icon: 'fa-chart-pie', name: 'ภาพรวม' },
+                    { id: 'tasks', icon: 'fa-bell', name: 'อนุมัติ', badge: pendingReq },
+                    { id: 'handover', icon: 'fa-box-open', name: 'ส่งมอบ', badge: approvedReq },
+                    { id: 'scan', icon: 'fa-qrcode', name: 'สแกน' }
+                ];
+            } else if(STATE.role === 'admin') {
+                tabs = [ 
+                    { id: 'stock', icon: 'fa-boxes', name: 'จัดการคลัง' },
+                    { id: 'users', icon: 'fa-users-cog', name: 'ผู้ใช้งาน' }
+                ];
+            } else {
+                tabs = [{ id: 'overview', icon: 'fa-chart-line', name: 'Report & Stats' }];
             }
-            nav.innerHTML = html;
+
+            nav.innerHTML = tabs.map(t => `
+                <div onclick="STATE.currentTab='${t.id}'; renderView()" class="tab-item ${STATE.currentTab === t.id ? 'active' : ''} relative">
+                    <i class="fas ${t.icon}"></i><span>${t.name}</span>
+                    ${t.badge ? `<span class="absolute top-1 right-8 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center border-2 border-white font-bold">${t.badge}</span>` : ''}
+                </div>
+            `).join('');
         }
 
-        // ==========================================
-        // VIEW: USER
-        // ==========================================
-        function renderUserHome() {
-            const main = document.getElementById('main-view');
-            let html = `
-                <div class="px-4 py-2">
-                    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-4 text-white shadow-lg mb-4">
-                        <h2 class="font-bold text-lg">สวัสดีครับ, คุณสมชาย</h2>
-                        <p class="text-xs opacity-80 mb-2">ชุมชนหมู่ 1 • Credit Score: A</p>
-                        <div class="flex gap-2 text-[10px]">
-                            <span class="bg-white/20 px-2 py-1 rounded">สิทธิ์คงเหลือ: 100%</span>
-                            <span class="bg-white/20 px-2 py-1 rounded">คืนตรงเวลา: 100%</span>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-2 overflow-x-auto pb-2 mb-2 no-scrollbar">
-                        <button class="px-4 py-1.5 bg-gray-800 text-white rounded-full text-xs whitespace-nowrap">ทั้งหมด</button>
-                        <button class="px-4 py-1.5 bg-gray-100 text-gray-600 border rounded-full text-xs whitespace-nowrap">เฟอร์นิเจอร์</button>
-                        <button class="px-4 py-1.5 bg-gray-100 text-gray-600 border rounded-full text-xs whitespace-nowrap">เครื่องเสียง</button>
-                    </div>
-
-                    <h3 class="font-bold text-sm text-gray-700 mb-2">รายการพัสดุ</h3>
-                    <div class="grid grid-cols-2 gap-3">
-            `;
-
-            DB.assets.forEach(item => {
-                const isOut = item.available <= 0;
-                html += `
-                    <div onclick="${isOut ? '' : `addToCart(${item.id})`}" class="bg-white p-3 rounded-xl border border-gray-100 shadow-sm active:scale-95 transition relative overflow-hidden ${isOut ? 'opacity-60 grayscale' : ''}">
-                        ${isOut ? '<div class="absolute top-2 right-2 bg-red-500 text-white text-[9px] px-2 py-0.5 rounded font-bold">หมด</div>' : ''}
-                        <div class="h-20 bg-gray-50 rounded-lg flex items-center justify-center text-4xl mb-2">${item.img}</div>
-                        <h4 class="font-bold text-xs text-gray-800 line-clamp-1">${item.name}</h4>
-                        <div class="flex justify-between items-end mt-1">
-                            <span class="text-[10px] ${item.available < 5 ? 'text-red-500 font-bold' : 'text-green-600'}">ว่าง ${item.available}</span>
-                            <div class="w-6 h-6 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xs">+</div>
-                        </div>
-                    </div>
-                `;
-            });
-
-            html += `</div></div>`;
-            main.innerHTML = html;
-        }
-
-        function addToCart(id) {
-            const item = DB.assets.find(a => a.id === id);
+        // ===========================================
+        // USER VIEWS
+        // ===========================================
+        function renderUserHome(container) {
+            const categories = [ {id:'all',n:'ทั้งหมด',i:'fa-th'}, {id:'fur',n:'เฟอร์ฯ',i:'fa-chair'}, {id:'tech',n:'ไอที',i:'fa-laptop'}, {id:'audio',n:'เสียง',i:'fa-microphone'}, {id:'out',n:'สนาม',i:'fa-campground'}, {id:'traf',n:'จราจร',i:'fa-traffic-light'}, {id:'tool',n:'เครื่องมือ',i:'fa-tools'} ];
             
-            // SweetAlert for Qty
+            const filtered = DB.assets.filter(a => (STATE.currentCategory === 'all' || a.cat === STATE.currentCategory) && a.name.includes(STATE.searchQuery));
+
+            container.innerHTML = `
+                <div class="p-4 fade-in">
+                    <div class="relative mb-4">
+                        <i class="fas fa-search absolute left-3 top-3 text-gray-400 text-sm"></i>
+                        <input type="text" placeholder="ค้นหาครุภัณฑ์..." oninput="STATE.searchQuery=this.value; renderView()" class="w-full bg-white border border-slate-200 rounded-xl py-2.5 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
+                    </div>
+                    <div class="flex gap-2 overflow-x-auto pb-4 no-scrollbar">
+                        ${categories.map(c => `<button onclick="STATE.currentCategory='${c.id}'; renderView()" class="${STATE.currentCategory === c.id ? 'bg-slate-800 text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200'} px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all"><i class="fas ${c.icon}"></i> ${c.n}</button>`).join('')}
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 pb-20">
+                        ${filtered.map(item => {
+                            const isOut = item.available <= 0;
+                            return `
+                                <div onclick="${isOut ? '' : `addToCartLogic(${item.id})`}" class="bg-white rounded-2xl p-3 shadow-sm border border-slate-100 relative active:scale-95 transition-all cursor-pointer ${isOut ? 'opacity-60 grayscale' : ''}">
+                                    ${item.badge ? `<div class="absolute top-2 left-2 ${item.badge==='Hot'?'bg-red-500':'bg-blue-500'} text-white text-[9px] px-2 py-0.5 rounded font-bold z-10 shadow-sm">${item.badge}</div>` : ''}
+                                    <div class="h-28 bg-slate-50 rounded-xl flex items-center justify-center text-5xl mb-3">${item.img}</div>
+                                    <h4 class="font-bold text-sm text-slate-800 line-clamp-1">${item.name}</h4>
+                                    <div class="flex justify-between items-center mt-2">
+                                        <span class="text-xs ${isOut ? 'text-red-500' : 'text-slate-500'}">${isOut ? 'หมด' : `ว่าง ${item.available}`}</span>
+                                        <button class="w-7 h-7 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center"><i class="fas fa-plus text-xs"></i></button>
+                                    </div>
+                                </div>
+                            `
+                        }).join('')}
+                    </div>
+                </div>`;
+        }
+
+        function addToCartLogic(id) {
+            const item = DB.assets.find(a => a.id === id);
             Swal.fire({
-                title: item.name,
-                text: `คงเหลือ: ${item.available} ชิ้น`,
-                input: 'number',
-                inputValue: 1,
-                inputAttributes: { min: 1, max: item.available, step: 1 },
-                showCancelButton: true,
-                confirmButtonText: 'ใส่ตะกร้า',
-                confirmButtonColor: '#2563eb'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    const qty = parseInt(result.value);
-                    const existing = STATE.cart.find(c => c.id === id);
-                    if(existing) existing.qty += qty;
-                    else STATE.cart.push({...item, qty});
-                    
-                    renderTabs(); // Update badge
-                    const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 1500 });
-                    Toast.fire({ icon: 'success', title: 'เพิ่มลงตะกร้าแล้ว' });
+                title: item.name, html: `คงเหลือ: ${item.available}`, input: 'number', inputValue: 1, showCancelButton: true, confirmButtonText: 'ใส่ตะกร้า', confirmButtonColor: '#2563eb'
+            }).then((res) => {
+                if (res.isConfirmed) {
+                    const qty = parseInt(res.value);
+                    const exist = STATE.cart.find(c => c.id === id);
+                    if(exist) exist.qty += qty; else STATE.cart.push({...item, qty});
+                    renderView();
+                    Swal.fire({icon: 'success', title: 'เพิ่มแล้ว', toast: true, position: 'top', timer: 1000, showConfirmButton: false});
                 }
             });
         }
 
-        function renderUserCart() {
-            const main = document.getElementById('main-view');
-            if(STATE.cart.length === 0) {
-                main.innerHTML = `<div class="h-full flex flex-col items-center justify-center text-gray-400">
-                    <i class="fas fa-shopping-basket text-4xl mb-2"></i><p>ตะกร้าว่างเปล่า</p>
-                    <button onclick="renderUserHome()" class="mt-4 text-blue-600 font-bold text-sm">กลับไปเลือกของ</button>
-                </div>`;
-                return;
-            }
-
-            let html = `<div class="px-4 py-2"><h2 class="font-bold text-lg mb-3">ตะกร้าสินค้า</h2><div class="space-y-3 mb-6">`;
-            
-            STATE.cart.forEach((item, idx) => {
-                html += `
-                    <div class="bg-white p-3 rounded-xl border border-gray-100 shadow-sm flex items-center gap-3">
-                        <div class="w-12 h-12 bg-gray-50 rounded-lg flex items-center justify-center text-2xl">${item.img}</div>
-                        <div class="flex-1">
-                            <h4 class="font-bold text-sm">${item.name}</h4>
-                            <div class="flex items-center gap-2 mt-1">
-                                <button onclick="STATE.cart[${idx}].qty > 1 ? STATE.cart[${idx}].qty-- : null; renderUserCart();" class="w-5 h-5 bg-gray-100 rounded text-xs">-</button>
-                                <span class="text-xs font-bold w-4 text-center">${item.qty}</span>
-                                <button onclick="STATE.cart[${idx}].qty++; renderUserCart();" class="w-5 h-5 bg-gray-100 rounded text-xs">+</button>
-                            </div>
-                        </div>
-                        <button onclick="STATE.cart.splice(${idx},1); renderUserCart(); renderTabs();" class="text-red-500"><i class="fas fa-trash"></i></button>
+        function renderUserCart(container) {
+            if(STATE.cart.length === 0) return container.innerHTML = `<div class="h-full flex flex-col items-center justify-center text-slate-400"><i class="fas fa-shopping-basket text-4xl mb-2"></i><p>ว่างเปล่า</p><button onclick="STATE.currentTab='home'; renderView()" class="mt-4 px-6 py-2 bg-blue-50 text-blue-600 rounded-full text-xs font-bold">ไปช้อปกัน</button></div>`;
+            container.innerHTML = `
+                <div class="p-4 fade-in pb-20">
+                    <h2 class="font-bold mb-4 text-slate-800">ตะกร้า (${STATE.cart.length})</h2>
+                    <div class="space-y-3 mb-6">${STATE.cart.map((i,idx) => `<div class="bg-white p-3 rounded-xl border border-slate-100 flex items-center gap-3 shadow-sm"><div class="text-3xl w-12 text-center bg-slate-50 rounded-lg py-1">${i.img}</div><div class="flex-1"><div class="font-bold text-sm text-slate-800">${i.name}</div><div class="text-xs text-slate-500">จำนวน: ${i.qty}</div></div><button onclick="STATE.cart.splice(${idx},1); renderView()" class="text-red-500 ml-2 bg-red-50 w-8 h-8 rounded-full flex items-center justify-center"><i class="fas fa-trash text-xs"></i></button></div>`).join('')}</div>
+                    <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm mb-4">
+                        <label class="text-[10px] uppercase font-bold text-slate-400">วันที่ใช้งาน</label>
+                        <input type="date" class="w-full border-b border-slate-200 py-2 text-sm outline-none">
                     </div>
-                `;
-            });
-
-            html += `</div>
-                <div class="bg-gray-50 p-4 rounded-xl mb-6">
-                    <h3 class="font-bold text-xs text-gray-500 mb-2 uppercase">รายละเอียดการยืม</h3>
-                    <input type="datetime-local" class="w-full bg-white border border-gray-200 rounded p-2 text-xs mb-2">
-                    <textarea class="w-full bg-white border border-gray-200 rounded p-2 text-xs h-16" placeholder="ระบุเหตุผล..."></textarea>
-                </div>
-                <button onclick="submitOrder()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold shadow-lg shadow-blue-500/30">ยืนยันคำขอ</button>
-            </div>`;
-            main.innerHTML = html;
+                    <button onclick="submitOrder()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-xl font-bold shadow-lg shadow-blue-500/30 active:scale-95 transition">ยืนยันคำขอ</button>
+                </div>`;
         }
 
         function submitOrder() {
-            Swal.fire({
-                title: 'ยืนยัน?',
-                text: "ส่งคำขอให้เจ้าหน้าที่ตรวจสอบ",
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#2563eb',
-                confirmButtonText: 'ยืนยัน'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    const orderId = 'R-' + Math.floor(Math.random() * 1000);
-                    const itemsText = STATE.cart.map(i => `${i.name} x${i.qty}`).join(', ');
-                    
-                    DB.requests.unshift({
-                        id: orderId,
-                        user: 'นายสมชาย',
-                        items: STATE.cart.map(i => ({name: i.name, qty: i.qty})),
-                        status: 'pending',
-                        date: 'Just Now'
-                    });
-                    
-                    STATE.cart = [];
-                    renderTabs();
-                    renderUserStatus();
-                    
-                    // Trigger Fake Line Notify
-                    triggerNotification(`สร้างคำขอ ${orderId} เรียบร้อยแล้ว`, 'flex-request');
-                }
-            });
+            const reqId = 'R-' + Math.floor(Math.random()*9000+1000);
+            DB.requests.unshift({ id: reqId, user: 'นายสมชาย', items: STATE.cart.map(i=>`${i.name} x${i.qty}`).join(', '), status: 'pending', date: 'Now' });
+            STATE.cart = []; STATE.currentTab = 'status'; renderView();
+            setTimeout(() => triggerNotification(`สร้างคำขอ ${reqId} สำเร็จ`, 'req'), 800);
         }
 
-        function renderUserStatus() {
-            const main = document.getElementById('main-view');
-            let html = `<div class="px-4 py-2"><h2 class="font-bold text-lg mb-3">สถานะคำขอ</h2><div class="space-y-3">`;
-            
-            DB.requests.forEach(req => {
-                let badge = req.status === 'approved' 
-                    ? '<span class="bg-green-100 text-green-600 text-[10px] px-2 py-0.5 rounded font-bold">อนุมัติแล้ว</span>'
-                    : '<span class="bg-orange-100 text-orange-600 text-[10px] px-2 py-0.5 rounded font-bold">รอตรวจสอบ</span>';
-                
-                html += `
-                    <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
-                        <div class="flex justify-between mb-2">
-                            <span class="font-mono text-xs text-gray-500">${req.id} • ${req.date}</span>
-                            ${badge}
-                        </div>
-                        <div class="bg-gray-50 p-2 rounded text-xs text-gray-700 mb-3">
-                            ${req.items.map(i => `<div>- ${i.name} x${i.qty}</div>`).join('')}
-                        </div>
-                        ${req.status === 'approved' ? 
-                            `<button onclick="renderUserQR('${req.id}')" class="w-full bg-green-500 text-white py-2 rounded-lg text-xs font-bold"><i class="fas fa-qrcode mr-1"></i> สแกนรับของ</button>` : 
-                            '<button class="w-full bg-gray-100 text-gray-400 py-2 rounded-lg text-xs font-bold cursor-not-allowed">รอการอนุมัติ</button>'}
-                    </div>
-                `;
-            });
-            html += `</div></div>`;
-            main.innerHTML = html;
+        function renderUserStatus(container) {
+            container.innerHTML = `
+                <div class="p-4 fade-in pb-20"><h2 class="font-bold mb-4 text-slate-800">สถานะคำขอ</h2><div class="space-y-3">
+                ${DB.requests.map(r => {
+                    let badge = r.status==='approved' ? 'bg-green-100 text-green-600' : (r.status==='active' ? 'bg-blue-100 text-blue-600' : 'bg-orange-100 text-orange-600');
+                    let statusTxt = r.status==='approved' ? 'รอรับของ' : (r.status==='active' ? 'กำลังใช้งาน' : 'รอตรวจสอบ');
+                    return `
+                    <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+                        <div class="flex justify-between mb-2"><span class="font-mono text-xs text-slate-400 font-bold">${r.id}</span><span class="px-2 py-0.5 rounded text-[10px] font-bold ${badge}">${statusTxt}</span></div>
+                        <div class="text-xs text-slate-700 mb-3 bg-slate-50 p-2 rounded">${r.items}</div>
+                        ${r.status==='approved' ? `<button onclick="Swal.fire('QR Code','ยื่นให้เจ้าหน้าที่สแกน','info')" class="w-full bg-green-500 text-white py-2 rounded-lg text-xs font-bold shadow-sm shadow-green-200"><i class="fas fa-qrcode mr-1"></i> แสดง QR รับของ</button>` : ''}
+                    </div>`
+                }).join('')}
+                </div></div>`;
         }
 
-        function renderUserQR(id) {
-            Swal.fire({
-                title: 'QR รับของ',
-                text: 'แสดงให้เจ้าหน้าที่สแกน',
-                html: `<div class="bg-white p-4 inline-block rounded-xl border-4 border-green-500 mb-2"><i class="fas fa-qrcode text-6xl"></i></div><br><span class="font-mono font-bold">${id}</span>`,
-                confirmButtonText: 'ปิด'
-            });
+        // ===========================================
+        // STAFF VIEWS (Flow Fix: Approve -> Handover)
+        // ===========================================
+        function renderStaffDash(container) {
+            const approvedCount = DB.requests.filter(r=>r.status==='approved').length;
+            const pendingCount = DB.requests.filter(r=>r.status==='pending').length;
+            container.innerHTML = `
+                <div class="p-4 fade-in">
+                    <div class="grid grid-cols-2 gap-3 mb-6">
+                        <div onclick="STATE.currentTab='handover'; renderView()" class="bg-blue-600 rounded-2xl p-4 text-white shadow-lg relative overflow-hidden cursor-pointer active:scale-95 transition">
+                            <i class="fas fa-box-open absolute -right-2 -bottom-2 text-6xl opacity-20"></i>
+                            <div class="text-3xl font-bold">${approvedCount}</div><div class="text-xs opacity-90 font-medium">รอส่งมอบ (กดเลย)</div>
+                        </div>
+                        <div onclick="STATE.currentTab='tasks'; renderView()" class="bg-orange-500 rounded-2xl p-4 text-white shadow-lg relative overflow-hidden cursor-pointer active:scale-95 transition">
+                            <i class="fas fa-clock absolute -right-2 -bottom-2 text-6xl opacity-20"></i>
+                            <div class="text-3xl font-bold">${pendingCount}</div><div class="text-xs opacity-90 font-medium">รออนุมัติ</div>
+                        </div>
+                    </div>
+                    <h3 class="font-bold text-sm text-slate-700 mb-3 px-1">เมนูด่วน</h3>
+                    <div class="grid grid-cols-3 gap-3">
+                        <div onclick="STATE.currentTab='scan'; renderView()" class="bg-white p-3 rounded-2xl border flex flex-col items-center gap-2 cursor-pointer hover:bg-slate-50"><div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600"><i class="fas fa-qrcode"></i></div><span class="text-[10px] font-bold text-slate-600">สแกน</span></div>
+                        <div class="bg-white p-3 rounded-2xl border flex flex-col items-center gap-2 cursor-pointer hover:bg-slate-50"><div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600"><i class="fas fa-dolly"></i></div><span class="text-[10px] font-bold text-slate-600">รับคืน</span></div>
+                        <div class="bg-white p-3 rounded-2xl border flex flex-col items-center gap-2 cursor-pointer hover:bg-slate-50"><div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600"><i class="fas fa-wrench"></i></div><span class="text-[10px] font-bold text-slate-600">แจ้งซ่อม</span></div>
+                    </div>
+                </div>`;
         }
 
-        // ==========================================
-        // VIEW: STAFF
-        // ==========================================
-        function renderStaffDashboard() {
-            const main = document.getElementById('main-view');
-            main.innerHTML = `
-                <div class="px-4 py-2">
-                    <div class="grid grid-cols-2 gap-3 mb-4">
-                        <div class="bg-blue-600 rounded-xl p-4 text-white shadow-lg relative overflow-hidden">
-                            <i class="fas fa-box absolute -right-3 -bottom-3 text-6xl opacity-20"></i>
-                            <div class="text-2xl font-bold">${DB.requests.filter(r => r.status === 'approved').length}</div>
-                            <div class="text-xs opacity-80">รอส่งมอบ</div>
-                        </div>
-                        <div class="bg-orange-500 rounded-xl p-4 text-white shadow-lg relative overflow-hidden">
-                            <i class="fas fa-clock absolute -right-3 -bottom-3 text-6xl opacity-20"></i>
-                            <div class="text-2xl font-bold">${DB.requests.filter(r => r.status === 'pending').length}</div>
-                            <div class="text-xs opacity-80">รออนุมัติ</div>
-                        </div>
-                    </div>
-
-                    <h3 class="font-bold text-sm text-gray-700 mb-2">Quick Actions</h3>
-                    <div class="grid grid-cols-3 gap-2 mb-6">
-                        <button onclick="renderScanner()" class="flex flex-col items-center bg-gray-50 p-3 rounded-xl hover:bg-blue-50 transition border border-gray-100">
-                            <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mb-1"><i class="fas fa-qrcode"></i></div>
-                            <span class="text-[10px] font-bold">สแกน</span>
-                        </button>
-                        <button class="flex flex-col items-center bg-gray-50 p-3 rounded-xl hover:bg-green-50 transition border border-gray-100">
-                            <div class="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center mb-1"><i class="fas fa-plus"></i></div>
-                            <span class="text-[10px] font-bold">รับคืน</span>
-                        </button>
-                        <button class="flex flex-col items-center bg-gray-50 p-3 rounded-xl hover:bg-red-50 transition border border-gray-100">
-                            <div class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center mb-1"><i class="fas fa-wrench"></i></div>
-                            <span class="text-[10px] font-bold">แจ้งซ่อม</span>
-                        </button>
-                    </div>
-
-                    <h3 class="font-bold text-sm text-gray-700 mb-2">Log ล่าสุด</h3>
-                    <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-                        ${DB.logs.slice(0,3).map(l => `
-                            <div class="flex items-center p-3 border-b border-gray-50 last:border-0">
-                                <span class="text-xs font-mono text-gray-400 mr-3">${l.time}</span>
-                                <div>
-                                    <div class="text-xs font-bold text-gray-700">${l.actor}</div>
-                                    <div class="text-[10px] text-gray-500">${l.action}</div>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderStaffTasks() {
-            const main = document.getElementById('main-view');
-            const pendings = DB.requests.filter(r => r.status === 'pending');
-            
-            let html = `<div class="px-4 py-2"><h2 class="font-bold text-lg mb-3">รายการรออนุมัติ (${pendings.length})</h2><div class="space-y-3">`;
-            
-            if(pendings.length === 0) {
-                html += `<div class="text-center text-gray-400 mt-10"><i class="fas fa-check-circle text-4xl mb-2"></i><p>ไม่มีงานค้าง</p></div>`;
-            }
-
-            pendings.forEach(req => {
-                html += `
-                    <div class="bg-white p-4 rounded-xl border-l-4 border-blue-500 shadow-sm">
-                        <div class="flex justify-between items-start mb-2">
-                            <div>
-                                <h4 class="font-bold text-sm">${req.user}</h4>
-                                <span class="text-[10px] text-gray-500">User Credit: A</span>
-                            </div>
-                            <span class="text-[10px] text-gray-400">${req.date}</span>
-                        </div>
-                        <div class="bg-gray-50 p-2 rounded text-xs text-gray-600 mb-3">
-                            ${req.items.map(i => `<div>• ${i.name} x${i.qty}</div>`).join('')}
-                        </div>
-                        <div class="flex gap-2">
-                            <button onclick="approveRequest('${req.id}')" class="flex-1 bg-green-500 text-white py-2 rounded-lg text-xs font-bold shadow-sm">อนุมัติ</button>
-                            <button class="flex-1 bg-gray-100 text-gray-600 py-2 rounded-lg text-xs font-bold">ปฏิเสธ</button>
-                        </div>
-                    </div>
-                `;
-            });
-            html += `</div></div>`;
-            main.innerHTML = html;
+        function renderStaffTasks(container) {
+            const pendings = DB.requests.filter(r=>r.status==='pending');
+            container.innerHTML = `<div class="p-4 fade-in pb-20"><h2 class="font-bold mb-4">รออนุมัติ (${pendings.length})</h2>
+            ${pendings.length===0 ? '<div class="text-center text-slate-400 mt-10"><i class="fas fa-check-circle text-4xl mb-2 text-green-400"></i><p>ไม่มีงานค้าง</p></div>' : pendings.map(req => `
+                <div class="bg-white p-4 rounded-xl border-l-4 border-orange-500 shadow-sm mb-3">
+                    <div class="flex justify-between mb-2"><h4 class="font-bold text-sm text-slate-800">${req.user}</h4><span class="text-[10px] text-slate-400 font-mono">${req.date}</span></div>
+                    <div class="bg-orange-50 p-2 text-xs mb-3 border border-orange-100 text-orange-800 rounded">${req.items}</div>
+                    <button onclick="approveRequest('${req.id}')" class="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded text-xs font-bold shadow-sm transition-colors">อนุมัติ</button>
+                </div>`).join('')}</div>`;
         }
 
         function approveRequest(id) {
-            Swal.fire({ title: 'ยืนยันอนุมัติ?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#22c55e', confirmButtonText: 'Yes' }).then((res) => {
+            Swal.fire({title:'อนุมัติรายการ?', icon:'question', showCancelButton:true, confirmButtonColor:'#22c55e', confirmButtonText:'อนุมัติ'}).then(res=>{
                 if(res.isConfirmed) {
-                    const req = DB.requests.find(r => r.id === id);
-                    req.status = 'approved';
-                    
-                    DB.logs.unshift({ time: moment().format('HH:mm'), actor: 'Staff', action: `Approved ${id}` });
-                    
-                    renderStaffTasks();
-                    renderTabs(); // Update badge
-                    
-                    // Trigger Notification to User (Simulation)
-                    setTimeout(() => {
-                        triggerNotification(`คำขอ ${id} ได้รับการอนุมัติแล้ว`, 'flex-approve');
-                    }, 1000);
+                    DB.requests.find(r=>r.id===id).status = 'approved';
+                    renderView();
+                    setTimeout(()=>triggerNotification(`อนุมัติ ${id} แล้ว`, 'approve'), 500);
                 }
             });
         }
 
-        function renderScanner() {
-            const main = document.getElementById('main-view');
-            main.innerHTML = `
-                <div class="h-full bg-black relative flex flex-col items-center justify-center overflow-hidden">
-                    <img src="https://images.unsplash.com/photo-1566576912322-7e8abb0eb9e5?w=800&q=80" class="absolute inset-0 w-full h-full object-cover opacity-50">
-                    
-                    <div class="w-64 h-64 border-2 border-green-400 rounded-3xl relative z-10">
-                        <div class="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-green-500 -mt-1 -ml-1"></div>
-                        <div class="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-green-500 -mt-1 -mr-1"></div>
-                        <div class="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-green-500 -mb-1 -ml-1"></div>
-                        <div class="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-green-500 -mb-1 -mr-1"></div>
-                        <div class="w-full h-0.5 bg-green-500 shadow-[0_0_15px_rgba(34,197,94,1)] absolute top-1/2 animate-[pulse_1.5s_infinite]"></div>
-                    </div>
-                    
-                    <div class="z-10 mt-8 text-center">
-                        <p class="text-white font-bold animate-pulse mb-4">Searching for QR Code...</p>
-                        <button onclick="Swal.fire('Scan Found', 'Found R-099<br>User: นายสมชาย', 'success')" class="bg-white/20 backdrop-blur border border-white/50 text-white px-6 py-2 rounded-full text-xs font-bold">
-                            Simulate Scan
-                        </button>
-                    </div>
-                </div>
-            `;
+        function renderStaffHandover(container) {
+            const approved = DB.requests.filter(r=>r.status==='approved');
+            container.innerHTML = `<div class="p-4 fade-in pb-20"><h2 class="font-bold mb-4">รอส่งมอบ (${approved.length})</h2>
+            ${approved.length===0 ? '<div class="text-center text-slate-400 mt-10"><p>ไม่มีรายการต้องส่งมอบ</p></div>' : approved.map(req => `
+                <div class="bg-white p-4 rounded-xl border-l-4 border-blue-600 shadow-sm mb-3">
+                    <div class="flex justify-between mb-2"><h4 class="font-bold text-sm text-blue-800">${req.user}</h4><span class="text-[10px] text-slate-400">${req.id}</span></div>
+                    <div class="bg-blue-50 p-2 text-xs mb-3 text-blue-800 rounded border border-blue-100">${req.items}</div>
+                    <button onclick="performHandover('${req.id}')" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded text-xs font-bold shadow-sm transition-colors"><i class="fas fa-qrcode"></i> สแกนเพื่อส่งมอบ</button>
+                </div>`).join('')}</div>`;
         }
 
-        // ==========================================
-        // VIEW: ADMIN
-        // ==========================================
-        function renderAdminUsers() {
-            const main = document.getElementById('main-view');
-            const pendingUsers = DB.users.filter(u => u.status === 'pending');
+        function performHandover(id) {
+            const container = document.getElementById('main-view');
+            container.innerHTML = `
+                <div class="h-full bg-black relative flex flex-col items-center justify-center">
+                    <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&q=80" class="absolute inset-0 w-full h-full object-cover opacity-50">
+                    <div class="w-64 h-64 border-2 border-green-400 rounded-3xl relative z-10"><div class="w-full h-0.5 bg-green-500 absolute top-1/2 animate-pulse shadow-[0_0_15px_rgba(34,197,94,1)]"></div></div>
+                    <div class="z-10 mt-8 text-white font-bold animate-pulse">กำลังสแกน...</div>
+                </div>`;
             
-            let html = `<div class="px-4 py-2">
-                <div class="bg-gray-50 rounded-xl p-3 mb-4 flex justify-between items-center border border-gray-200">
-                    <span class="text-xs font-bold text-gray-600">Total Users</span>
-                    <span class="text-lg font-bold text-blue-600">${DB.users.length}</span>
-                </div>
-                
-                <h3 class="font-bold text-sm text-gray-700 mb-2">New Registrations (${pendingUsers.length})</h3>
-                <div class="space-y-2 mb-6">`;
-
-            if(pendingUsers.length === 0) html += `<div class="text-center text-xs text-gray-400 py-4">No pending users</div>`;
-
-            pendingUsers.forEach(u => {
-                html += `
-                    <div class="bg-white p-3 rounded-xl border border-gray-100 shadow-sm flex justify-between items-center">
-                        <div>
-                            <div class="font-bold text-sm">${u.name}</div>
-                            <div class="text-[10px] text-gray-500">${u.dept} • ${u.role}</div>
-                        </div>
-                        <div class="flex gap-1">
-                            <button onclick="approveUser('${u.id}')" class="w-7 h-7 bg-green-100 text-green-600 rounded flex items-center justify-center"><i class="fas fa-check text-xs"></i></button>
-                            <button class="w-7 h-7 bg-red-100 text-red-600 rounded flex items-center justify-center"><i class="fas fa-times text-xs"></i></button>
-                        </div>
-                    </div>
-                `;
-            });
-
-            html += `</div>
-                <h3 class="font-bold text-sm text-gray-700 mb-2">Active Users</h3>
-                <div class="bg-white rounded-xl border border-gray-100 overflow-hidden">
-                    ${DB.users.filter(u => u.status === 'active').map(u => `
-                        <div class="p-3 border-b border-gray-50 flex justify-between items-center text-xs">
-                            <span class="font-bold text-gray-700">${u.name}</span>
-                            <span class="bg-gray-100 px-2 py-0.5 rounded text-gray-500">${u.role}</span>
-                        </div>
-                    `).join('')}
-                </div>
-            </div>`;
-            main.innerHTML = html;
+            setTimeout(() => {
+                DB.requests.find(r=>r.id===id).status = 'active';
+                Swal.fire({title: 'สำเร็จ', text: 'ส่งมอบพัสดุเรียบร้อย สถานะ: กำลังใช้งาน', icon: 'success'});
+                STATE.currentTab = 'handover';
+                renderView();
+            }, 1500);
         }
 
-        function approveUser(id) {
-            const u = DB.users.find(u => u.id === id);
-            u.status = 'active';
-            Swal.fire('Approved', `${u.name} is now active`, 'success');
-            renderAdminUsers();
+        function renderStaffScan(container) {
+            container.innerHTML = `<div class="h-full flex items-center justify-center bg-slate-900 text-white"><div class="text-center"><i class="fas fa-qrcode text-6xl mb-4 text-blue-500"></i><p>แตะเพื่อเปิดกล้อง</p></div></div>`;
         }
 
-        function renderAdminStock() {
-            const main = document.getElementById('main-view');
-            let html = `<div class="px-4 py-2"><h2 class="font-bold text-lg mb-3">Stock Management</h2><div class="space-y-2">`;
-            
-            DB.assets.forEach(a => {
-                html += `
-                    <div class="bg-white p-3 rounded-xl border border-gray-100 shadow-sm flex items-center gap-3">
-                        <div class="w-10 h-10 bg-gray-50 rounded flex items-center justify-center text-xl">${a.img}</div>
-                        <div class="flex-1">
-                            <div class="font-bold text-sm">${a.name}</div>
-                            <div class="text-[10px] text-gray-400">Total: ${a.stock}</div>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <button onclick="updateStock(${a.id}, -1)" class="w-6 h-6 bg-gray-100 rounded text-gray-600 font-bold">-</button>
-                            <span class="text-xs font-bold w-4 text-center" id="stock-${a.id}">${a.stock}</span>
-                            <button onclick="updateStock(${a.id}, 1)" class="w-6 h-6 bg-gray-100 rounded text-blue-600 font-bold">+</button>
-                        </div>
+        // ===========================================
+        // ADMIN VIEWS (Added: Add Item Function)
+        // ===========================================
+        function renderAdminStock(container) {
+            container.innerHTML = `
+                <div class="p-4 fade-in pb-20">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="font-bold text-slate-800">จัดการคลัง (${DB.assets.length} รายการ)</h2>
                     </div>
-                `;
-            });
-            html += `</div></div>`;
-            main.innerHTML = html;
-        }
-
-        function updateStock(id, delta) {
-            const asset = DB.assets.find(a => a.id === id);
-            asset.stock += delta;
-            renderAdminStock();
-        }
-
-        // ==========================================
-        // VIEW: EXECUTIVE
-        // ==========================================
-        function renderExecDashboard() {
-            const main = document.getElementById('main-view');
-            main.innerHTML = `
-                <div class="px-4 py-2">
-                    <div class="bg-gradient-to-br from-indigo-900 to-purple-900 rounded-xl p-4 text-white shadow-lg mb-4">
-                        <h2 class="text-xs font-bold text-indigo-200 mb-1 uppercase">Social Impact (Month)</h2>
-                        <div class="flex items-baseline gap-2 mb-3">
-                            <span class="text-3xl font-bold">1,248</span>
-                            <span class="text-xs text-indigo-200">Transactions</span>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4 text-xs border-t border-indigo-700 pt-3">
-                            <div>
-                                <span class="block text-indigo-300">Beneficiaries</span>
-                                <span class="font-bold text-lg">~5k People</span>
-                            </div>
-                            <div>
-                                <span class="block text-indigo-300">Budget Saved</span>
-                                <span class="font-bold text-lg">฿ 2.5M</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm mb-4">
-                        <h3 class="font-bold text-sm text-gray-700 mb-2">Category Utilization</h3>
-                        <canvas id="utilChart" height="200"></canvas>
-                    </div>
-
-                    <h3 class="font-bold text-sm text-gray-700 mb-2">Top 5 Popular Items</h3>
-                    <div class="space-y-2 mb-6">
-                        ${DB.assets.sort((a,b) => b.pop - a.pop).slice(0,5).map(a => `
-                            <div class="bg-white p-2 rounded-lg border border-gray-100 shadow-sm">
-                                <div class="flex justify-between text-xs mb-1">
-                                    <span class="font-bold text-gray-700">${a.img} ${a.name}</span>
-                                    <span class="text-blue-600 font-bold">${a.pop}%</span>
+                    <div class="space-y-2">
+                        ${DB.assets.map(a => `
+                            <div class="bg-white p-2 rounded-xl border border-slate-100 shadow-sm flex items-center gap-3">
+                                <div class="w-10 h-10 bg-slate-50 rounded-lg flex items-center justify-center text-xl">${a.img}</div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="font-bold text-sm text-slate-800 truncate">${a.name}</div>
+                                    <div class="text-[10px] text-slate-400 uppercase">${a.cat}</div>
                                 </div>
-                                <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                    <div class="h-full bg-blue-500 rounded-full" style="width: ${a.pop}%"></div>
+                                <div class="flex items-center gap-2 bg-slate-50 rounded-lg p-1">
+                                    <button onclick="updateStock(${a.id}, -1)" class="w-6 h-6 bg-white rounded shadow-sm text-slate-600 font-bold hover:text-red-500">-</button>
+                                    <span class="text-xs font-bold w-6 text-center text-slate-700">${a.stock}</span>
+                                    <button onclick="updateStock(${a.id}, 1)" class="w-6 h-6 bg-white rounded shadow-sm text-blue-600 font-bold hover:text-blue-700">+</button>
                                 </div>
                             </div>
                         `).join('')}
                     </div>
+                </div>
+            `;
+        }
 
-                    <h3 class="font-bold text-sm text-gray-700 mb-2">Damage Report</h3>
-                    <div class="bg-white rounded-xl border border-gray-100 overflow-hidden">
-                         <table class="w-full text-left text-[10px]">
-                            <thead class="bg-gray-50 text-gray-500 uppercase">
-                                <tr><th class="p-2">Item</th><th class="p-2">Issue</th><th class="p-2">Date</th></tr>
+        function adminAddAsset() {
+            Swal.fire({
+                title: 'เพิ่มสินค้าใหม่',
+                html: `
+                    <input id="swal-name" class="swal2-input" placeholder="ชื่อสินค้า">
+                    <input id="swal-stock" type="number" class="swal2-input" placeholder="จำนวนเริ่มต้น">
+                    <select id="swal-cat" class="swal2-input">
+                        <option value="fur">เฟอร์นิเจอร์</option>
+                        <option value="tech">ไอที</option>
+                        <option value="out">สนาม</option>
+                    </select>
+                `,
+                confirmButtonText: 'บันทึก',
+                confirmButtonColor: '#2563eb',
+                preConfirm: () => {
+                    return [
+                        document.getElementById('swal-name').value,
+                        document.getElementById('swal-stock').value,
+                        document.getElementById('swal-cat').value
+                    ]
+                }
+            }).then((result) => {
+                if(result.isConfirmed) {
+                    const [name, stock, cat] = result.value;
+                    if(!name || !stock) return;
+                    DB.assets.unshift({
+                        id: Date.now(), name: name, stock: parseInt(stock), available: parseInt(stock), img: '📦', cat: cat, badge: 'New'
+                    });
+                    renderView();
+                    Swal.fire('สำเร็จ', 'เพิ่มสินค้าแล้ว', 'success');
+                }
+            });
+        }
+
+        function updateStock(id, delta) {
+            const asset = DB.assets.find(a=>a.id===id);
+            asset.stock += delta;
+            if(asset.stock < 0) asset.stock = 0;
+            renderView();
+        }
+
+        function renderAdminUsers(container) {
+            container.innerHTML = `<div class="p-4 fade-in pb-20"><h2 class="font-bold mb-4 text-slate-800">จัดการผู้ใช้</h2><div class="space-y-3">${DB.users.map(u => `
+                <div class="bg-white p-3 rounded-xl border shadow-sm flex justify-between items-center">
+                    <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-500">${u.name[0]}</div><div><div class="font-bold text-sm text-slate-800">${u.name}</div><div class="text-[10px] text-slate-500">${u.role}</div></div></div>
+                    <div onclick="u.status=!u.status; renderView()" class="w-12 h-6 rounded-full p-1 cursor-pointer transition-colors ${u.status?'bg-green-500':'bg-slate-300'}"><div class="w-4 h-4 bg-white rounded-full shadow transition-transform ${u.status?'translate-x-6':''}"></div></div>
+                </div>`).join('')}</div></div>`;
+        }
+
+        // ===========================================
+        // EXEC VIEW (Restored & Enhanced)
+        // ===========================================
+        let chartInstance = null;
+        function renderExecDash(container) {
+            container.innerHTML = `
+                <div class="p-4 fade-in pb-20">
+                    <div class="bg-gradient-to-br from-indigo-900 to-purple-900 rounded-2xl p-5 text-white shadow-xl mb-6 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-10 -mt-10"></div>
+                        <h2 class="text-[10px] font-bold text-indigo-200 mb-1 uppercase tracking-widest">Social Impact (Month)</h2>
+                        <div class="flex items-end gap-3 mb-4"><span class="text-4xl font-bold">1,420</span><span class="text-xs text-indigo-200 mb-1">Transactions</span></div>
+                        <div class="grid grid-cols-2 gap-4 text-xs border-t border-indigo-700/50 pt-3">
+                            <div><span class="block text-indigo-300">มูลค่าของการช่วยชุมชน</span><span class="font-bold text-lg">฿ 1.2M</span></div>
+                            <div><span class="block text-indigo-300">ผู้ใช้ประโยชน์</span><span class="font-bold text-lg">~3.5k</span></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 mb-6">
+                        <h3 class="font-bold text-sm text-slate-700 mb-4 flex items-center gap-2"><i class="fas fa-chart-pie text-blue-500"></i> สัดส่วนการใช้งาน (Utilization)</h3>
+                        <div class="h-48 relative">
+                            <canvas id="execChart"></canvas>
+                        </div>
+                    </div>
+
+                    <h3 class="font-bold text-sm text-slate-700 mb-2 px-1 flex items-center gap-2"><i class="fas fa-tools text-red-500"></i> รายงานความเสียหาย</h3>
+                    <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-50 text-slate-500 font-bold border-b border-slate-100">
+                                <tr><th class="p-3">พัสดุ</th><th class="p-3">อาการ</th><th class="p-3">สถานะ</th></tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-50">
-                                <tr><td class="p-2">เก้าอี้พลาสติก</td><td class="p-2 text-red-500">ขาหัก</td><td class="p-2 text-gray-400">Jan 20</td></tr>
-                                <tr><td class="p-2">ไมค์ลอย</td><td class="p-2 text-red-500">ตกน้ำ</td><td class="p-2 text-gray-400">Jan 18</td></tr>
+                            <tbody class="divide-y divide-slate-100">
+                                ${DB.damages.map(d => `
+                                    <tr>
+                                        <td class="p-3 text-slate-700 font-bold">${d.item}<div class="text-[9px] text-slate-400 font-normal">${d.reporter}</div></td>
+                                        <td class="p-3 text-red-500 font-medium">${d.issue}</td>
+                                        <td class="p-3"><span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-[9px] font-bold">${d.status}</span></td>
+                                    </tr>
+                                `).join('')}
                             </tbody>
                         </table>
+                        <div class="p-2 text-center text-[10px] text-blue-500 font-bold border-t border-slate-100 cursor-pointer">ดูทั้งหมด</div>
                     </div>
                 </div>
             `;
             
-            // Init Chart
+            // Re-init Chart
             setTimeout(() => {
-                const ctx = document.getElementById('utilChart').getContext('2d');
-                new Chart(ctx, {
+                const ctx = document.getElementById('execChart');
+                if(!ctx) return;
+                
+                if(chartInstance) chartInstance.destroy();
+                chartInstance = new Chart(ctx.getContext('2d'), {
                     type: 'doughnut',
                     data: {
-                        labels: ['Furniture', 'Tech', 'Outdoor', 'Audio'],
+                        labels: ['Furniture', 'Tech', 'Outdoor', 'Audio', 'Traffic'],
                         datasets: [{
-                            data: [300, 50, 100, 40],
-                            backgroundColor: ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b'],
-                            borderWidth: 0
+                            data: [350, 120, 200, 80, 150],
+                            backgroundColor: ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444'],
+                            borderWidth: 0,
+                            hoverOffset: 10
                         }]
                     },
-                    options: { plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: {size: 10} } } } }
+                    options: { 
+                        responsive: true, 
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'right', labels: { usePointStyle: true, boxWidth: 6, font: {size:10} } } } 
+                    }
                 });
             }, 100);
         }
 
-        // --- INIT ---
-        setRole('user'); // Start as User
-
+        // --- UTILS ---
+        function triggerNotification(text, type) {
+            const n = document.getElementById('notification');
+            document.getElementById('notif-text').innerText = text;
+            n.classList.add('show');
+            setTimeout(() => n.classList.remove('show'), 4000);
+            
+            const chat = document.getElementById('chat-history');
+            const time = moment().format('HH:mm');
+            
+            if(type === 'req') {
+                chat.innerHTML += `<div class="self-start bg-white rounded-xl rounded-tl-none shadow-sm max-w-[80%] mb-3 overflow-hidden fade-in"><div class="bg-slate-800 text-white p-2 text-xs font-bold">New Request</div><div class="p-2"><p class="text-xs text-gray-700">ยืนยันคำขอของคุณแล้ว รอเจ้าหน้าที่ตรวจสอบ</p></div></div>`;
+            } else if(type === 'approve') {
+                chat.innerHTML += `<div class="self-start bg-white rounded-xl rounded-tl-none shadow-sm max-w-[80%] mb-3 p-2 fade-in"><div class="text-green-600 font-bold text-xs mb-1">✅ อนุมัติแล้ว</div><p class="text-xs text-gray-700">รายการพัสดุของคุณได้รับการอนุมัติ กรุณาติดต่อรับของ</p><div class="text-[9px] text-gray-400 text-right mt-1">${time}</div></div>`;
+            }
+        }
+        function openLineApp() { document.getElementById('app-line').style.display = 'flex'; document.getElementById('notification').classList.remove('show'); }
+        function closeLineApp() { document.getElementById('app-line').style.display = 'none'; }
     </script>
 </body>
 </html>
